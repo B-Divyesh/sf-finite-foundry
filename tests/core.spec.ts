@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { CHAPTERS, contractsForChapter, createGame, forecastOutput, selectedContract, stepSimulation, validatePlan } from '../src/core';
 
-test('@claim:seeded-contracts seeded contracts stay deterministic and vary by seed', () => {
+test('seeded contracts stay deterministic and vary by seed', () => {
   expect(contractsForChapter(42, 0)).toEqual(contractsForChapter(42, 0));
   expect(contractsForChapter(42, 0)).not.toEqual(contractsForChapter(43, 0));
   expect(contractsForChapter(42, 0)).toHaveLength(3);

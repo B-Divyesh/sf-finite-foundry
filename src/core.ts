@@ -53,8 +53,6 @@ export interface GameState {
   attempts: number;
   history: RunRecord[];
   updatedAt: number;
-  bonusMode?: boolean;
-  bonusContract?: Contract;
 }
 
 export const SHIFT_MS = 300_000;
@@ -161,21 +159,6 @@ export const CHAPTERS: Chapter[] = [
   }
 ];
 
-export const BONUS_CONTRACTS: Array<Contract & { chapterIndex: number }> = [
-  { id: 'bonus-01', client: 'Midnight Tram Shed', product: 'Flat brackets', quota: 27, mark: '◆', chapterIndex: 0 },
-  { id: 'bonus-02', client: 'Rain Gauge Union', product: 'Flat brackets', quota: 29, mark: '◆', chapterIndex: 0 },
-  { id: 'bonus-03', client: 'Kiln Door Repair', product: 'Fired tiles', quota: 27, mark: '◆', chapterIndex: 1 },
-  { id: 'bonus-04', client: 'Cold Harbor Cafe', product: 'Fired tiles', quota: 29, mark: '◆', chapterIndex: 1 },
-  { id: 'bonus-05', client: 'Signal Box Seven', product: 'Switch housings', quota: 23, mark: '◆', chapterIndex: 2 },
-  { id: 'bonus-06', client: 'Hill Relay Station', product: 'Switch housings', quota: 25, mark: '◆', chapterIndex: 2 },
-  { id: 'bonus-07', client: 'Glass Map Archive', product: 'Ceramic relays', quota: 27, mark: '◆', chapterIndex: 3 },
-  { id: 'bonus-08', client: 'Museum Clock Room', product: 'Ceramic relays', quota: 29, mark: '◆', chapterIndex: 3 },
-  { id: 'bonus-09', client: 'Repair Cafe Annex', product: 'Split clamps', quota: 27, mark: '◆', chapterIndex: 4 },
-  { id: 'bonus-10', client: 'Night Market Stalls', product: 'Split clamps', quota: 29, mark: '◆', chapterIndex: 4 },
-  { id: 'bonus-11', client: 'North Pump Terminus', product: 'Foundry cores', quota: 23, mark: '◆', chapterIndex: 5 },
-  { id: 'bonus-12', client: 'Final Print Archive', product: 'Foundry cores', quota: 25, mark: '◆', chapterIndex: 5 }
-];
-
 const CLIENTS = [
   ['North Quay Repairs', 'Moss Street Hardware', 'Civic Sign Shop', 'Canal Lock Works', 'Hilltop Radio Club'],
   ['Field Oven Co-op', 'Red Clay Studio', 'Juniper Kitchen', 'East Ward School', 'Harbor Tile Crew'],
@@ -270,7 +253,6 @@ export function forecastOutput(state: GameState): number {
 }
 
 export function selectedContract(state: GameState): Contract | undefined {
-  if (state.bonusMode && state.bonusContract) return state.bonusContract;
   return contractsForChapter(state.seed, state.chapterIndex).find((contract) => contract.id === state.selectedContractId);
 }
 
@@ -307,9 +289,6 @@ export function nextChapter(state: GameState): GameState {
     produced: Math.floor(state.produced),
     quota: contract.quota
   }] : state.history;
-  if (state.bonusMode) {
-    return { ...state, status: 'ending', history, selectedContractId: null, bonusMode: false, bonusContract: undefined, updatedAt: Date.now() };
-  }
   if (state.chapterIndex === CHAPTERS.length - 1) {
     return { ...state, status: 'dismantling', history, completedChapters: 6, updatedAt: Date.now() };
   }

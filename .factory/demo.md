@@ -18,6 +18,8 @@ The demo opens chapter two with seed `240319`. A named contract is selected, and
 
 The lowest available quota is chosen. A 10× demo clock completes the same five-minute simulation in about 30 seconds. `?test=1` changes only wall-clock speed for automated end-to-end checks.
 
+Choose **Play full demo** to begin at chapter one with the same fixed seed. It remains in the demo storage namespace, so the complete scripted campaign is safe to test.
+
 ## Isolation and reset
 
 Demo progress uses `demo:finite-foundry:save`. Its sound setting uses `demo:finite-foundry:mute`. Demo mode never reads or writes `finite-foundry:save`.

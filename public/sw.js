@@ -1,4 +1,4 @@
-const CACHE = 'finite-foundry-v1';
+const CACHE = 'finite-foundry-v2';
 const SHELL = ['/', '/demo', '/play', '/privacy', '/terms', '/assets/foundry-hero-768.webp', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {

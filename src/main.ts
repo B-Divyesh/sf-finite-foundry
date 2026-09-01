@@ -1,7 +1,6 @@
 import './style.css';
 import {
   activeRoute,
-  BONUS_CONTRACTS,
   CHAPTERS,
   contractsForChapter,
   createGame,
@@ -18,7 +17,6 @@ import {
   stepSimulation,
   validatePlan
 } from './core';
-import { getLicenseStatus, initializeLicense, restoreLicense } from './license';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const isDemoPath = () => location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
@@ -102,7 +100,7 @@ const routeMeta: Record<string, { title: string; description: string }> = {
   },
   '/privacy': {
     title: 'Privacy — Finite Foundry',
-    description: 'How Finite Foundry stores campaign progress and checks optional licenses.'
+    description: 'How Finite Foundry stores campaign progress locally in your browser.'
   },
   '/terms': {
     title: 'Terms — Finite Foundry',
@@ -132,7 +130,7 @@ function header(): string {
         <a href="/privacy" data-link>Privacy</a>
       </nav>
       <button class="sound-button" type="button" data-action="sound" aria-pressed="${muted}">${muted ? 'Sound off' : 'Sound on'}</button>
-    </header>${navigator.onLine ? '' : '<div class="network-notice" role="status">Offline. The campaign still works; license checks wait for a connection.</div>'}`;
+    </header>${navigator.onLine ? '' : '<div class="network-notice" role="status">Offline. The campaign still works and saves locally.</div>'}`;
 }
 
 function footer(): string {
@@ -145,84 +143,11 @@ function footer(): string {
 }
 
 function demoBanner(): string {
-  return `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span>Chapter two uses a 10× clock.</span><button type="button" data-action="reset-demo">Reset demo</button><a href="/play" data-action="start-real">Start for real</a></aside>`;
+  return `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span>Chapter two uses a 10× clock.</span><button type="button" data-action="reset-demo">Reset demo</button><button type="button" data-action="full-demo">Play full demo</button><a href="/play" data-action="start-real">Start for real</a></aside>`;
 }
 
 function landing(): string {
-  const license = getLicenseStatus();
-  return `${header()}
-    <main id="main">
-      <section class="hero paper-section">
-        <div class="hero-copy">
-          <p class="eyebrow">A finite incremental game</p>
-          <h1 tabindex="-1">Finish a six-chapter factory campaign</h1>
-          <p class="lede">For production-game players who want clear plans, useful pauses, and an ending.</p>
-          <div class="hero-actions">
-            <a class="button primary" href="/demo" data-link>Try it with sample data</a>
-            <span>Opens chapter two with a complete route.</span>
-          </div>
-          <a class="text-action" href="/play" data-link>Start a new campaign</a>
-          <ul class="plain-facts" aria-label="Game facts">
-            <li>Campaign saves in this browser</li>
-            <li>Works offline after the first visit</li>
-            <li>Full campaign is free</li>
-          </ul>
-        </div>
-        <figure class="hero-art">
-          <picture>
-            <source media="(max-width: 700px)" srcset="/assets/foundry-hero-768.webp" />
-            <img src="/assets/foundry-hero-1280.webp" width="1280" height="853" alt="A compact paper factory shows the kind of route you will build." fetchpriority="high" decoding="async" />
-          </picture>
-          <figcaption class="hero-route-card"><span>Sample route ready</span><ol><li>CUT</li><li>HEAT</li><li>COOL</li><li>PRESS</li></ol><strong>Forecast: 25 / 23 units</strong></figcaption>
-        </figure>
-      </section>
-
-      <section class="live-preview" aria-labelledby="preview-title">
-        <div>
-          <p class="chapter-stamp">Chapter 2 of 6</p>
-          <h2 id="preview-title">See the route before you run it</h2>
-          <p>The recipe needs heat. A cooling rack keeps the press safe.</p>
-        </div>
-        <ol class="preview-route" aria-label="Sample production route">
-          <li><span>1</span><strong>Cutter</strong><small>2 kW</small></li>
-          <li><span>2</span><strong>Kiln</strong><small>4 kW</small></li>
-          <li class="utility"><span>3</span><strong>Cooling rack</strong><small>1 kW</small></li>
-          <li><span>4</span><strong>Press</strong><small>3 kW</small></li>
-        </ol>
-        <div class="preview-readout"><span>Forecast</span><strong>25 / 23 units</strong><span>Simulated shift: 5:00</span></div>
-      </section>
-
-      <section class="steps paper-section" aria-labelledby="steps-title">
-        <h2 id="steps-title">How the campaign works</h2>
-        <ol>
-          <li><span>01</span><div><h3>Choose a contract</h3><p>Each run gives you three seeded orders with different quotas.</p></div></li>
-          <li><span>02</span><div><h3>Plan a safe route</h3><p>Place machines in recipe order. One new rule appears each chapter.</p></div></li>
-          <li><span>03</span><div><h3>Run and finish</h3><p>Production pauses with the tab. The sixth shift ends the campaign.</p></div></li>
-        </ol>
-      </section>
-
-      <section class="promise" aria-labelledby="promise-title">
-        <div><h2 id="promise-title">What the game leaves out</h2><p>No prestige resets, offline accrual, ads, energy limits, loot boxes, or paid progress.</p></div>
-        <div class="privacy-note"><h3>Your campaign stays local</h3><p>The game saves in your browser. You can export a copy at any time.</p></div>
-      </section>
-
-      <section class="paid paper-section" id="bonus" aria-labelledby="paid-title">
-        <div>
-          <p class="eyebrow">Optional contract set</p>
-          <h2 id="paid-title">Add twelve bonus contracts for $5 once</h2>
-          <p>The free campaign stays complete. The bonus set adds harder seeded orders after the ending.</p>
-          <p class="license-state" aria-live="polite">${license === 'unlocked' ? 'Bonus contracts are active on this device.' : license === 'inactive' ? 'This license is no longer active.' : license === 'checking' ? 'Checking the saved license…' : 'No bonus license is saved on this device.'}</p>
-        </div>
-        <div class="purchase-actions">
-          <a class="button primary" href="https://api.sociobot.in/api/v1/products/finite-foundry/checkout">Buy bonus contracts — $5 at Sociobot</a>
-          <form data-form="restore-license">
-            <label for="license-token">Have a license?</label>
-            <div><input id="license-token" name="license" autocomplete="off" required /><button type="submit">Restore license</button></div>
-            <p class="form-result" aria-live="polite"></p>
-          </form>
-        </div>
-      </section>
-    </main>${footer()}`;
+  return gamePage(false, true);
 }
 
 function contractPicker(state: GameState): string {
@@ -300,7 +225,7 @@ function planPanel(state: GameState): string {
 
 function resultPanel(state: GameState): string {
   const contract = selectedContract(state)!;
-  if (state.status === 'won') return `<section class="result-panel won" aria-labelledby="result-title"><p class="result-mark" aria-hidden="true">✓</p><div><h2 id="result-title">Contract complete</h2><p>You made ${Math.floor(state.produced)} units for ${contract.client}.</p></div><button class="button primary" type="button" data-action="next-chapter">${state.bonusMode ? 'Return to bonus contracts' : state.chapterIndex === 5 ? 'Dismantle the machine' : 'Plan the next chapter'}</button></section>`;
+  if (state.status === 'won') return `<section class="result-panel won" aria-labelledby="result-title"><p class="result-mark" aria-hidden="true">✓</p><div><h2 id="result-title">Contract complete</h2><p>You made ${Math.floor(state.produced)} units for ${contract.client}.</p></div><button class="button primary" type="button" data-action="next-chapter">${state.chapterIndex === 5 ? 'Dismantle the machine' : 'Plan the next chapter'}</button></section>`;
   if (state.status === 'lost') return `<section class="result-panel lost" aria-labelledby="result-title"><p class="result-mark" aria-hidden="true">×</p><div><h2 id="result-title">Quota missed</h2><p>You made ${Math.floor(state.produced)} of ${contract.quota} units. Change the pace or choose another contract.</p></div><button class="button primary" type="button" data-action="retry-shift">Replan this shift</button></section>`;
   return '';
 }
@@ -314,25 +239,24 @@ function dismantlePanel(state: GameState): string {
 }
 
 function endingPanel(state: GameState): string {
-  const unlocked = getLicenseStatus() === 'unlocked';
   return `<section class="ending paper-section" aria-labelledby="ending-title"><p class="ending-mark" aria-hidden="true">■ ● ▲</p><h2 id="ending-title">Six shifts. One finished machine.</h2><p>You completed every contract and took the foundry apart. There is no prestige reset.</p>
     <dl><div><dt>Campaign seed</dt><dd>${state.seed}</dd></div><div><dt>Contracts filled</dt><dd>${state.history.length}</dd></div><div><dt>Attempts</dt><dd>${state.attempts}</dd></div></dl>
     <div class="ending-actions"><button class="button primary" type="button" data-action="new-campaign">Start another campaign</button><button type="button" data-action="export-save">Export campaign record</button></div>
-  </section>
-  <section class="bonus-board" aria-labelledby="bonus-title"><div><p class="eyebrow">Optional set</p><h2 id="bonus-title">Twelve bonus contracts</h2><p>${unlocked ? 'Choose any harder one-shift order. Completed orders join this campaign record.' : 'A $5 one-time license adds twelve harder one-shift orders.'}</p></div>
-    ${unlocked ? `<div class="bonus-list">${BONUS_CONTRACTS.map((contract, index) => `<button type="button" data-bonus="${index}"><span>${String(index + 1).padStart(2, '0')}</span><strong>${contract.client}</strong><small>${contract.product} · ${contract.quota} units</small></button>`).join('')}</div>` : '<a class="button primary" href="https://api.sociobot.in/api/v1/products/finite-foundry/checkout">Buy bonus contracts — $5 at Sociobot</a>'}
+    <p class="availability-note">Bonus contracts are unavailable while operator registration is pending. The complete six-chapter campaign is free.</p>
   </section>`;
 }
 
-function gamePage(demo: boolean): string {
+function gamePage(demo: boolean, home = false): string {
   gameState ??= safeLoad() ?? createGame(demo ? 240319 : Math.floor(Date.now() / 1000), demo);
   const state = gameState;
   const chapter = CHAPTERS[state.chapterIndex]!;
   const isEnding = state.status === 'ending';
-  return `${header()}${demo ? demoBanner() : ''}<main id="main" class="game-main">
-    <section class="game-heading">
-      <div><p class="chapter-stamp">${isEnding ? 'Campaign complete' : `Chapter ${chapter.number} of 6`}</p><h1 tabindex="-1">${isEnding ? 'You finished the foundry' : chapter.title}</h1><p>${isEnding ? 'Your campaign record is ready to export.' : chapter.lesson}</p></div>
-      <div class="campaign-tools"><span>Seed ${state.seed}</span><button type="button" data-action="export-save">Export save</button><button type="button" data-action="new-campaign">New campaign</button></div>
+  const pageHeading = isEnding ? 'You finished the foundry' : home ? 'Finish a six-chapter factory campaign' : chapter.title;
+  const pageDescription = isEnding ? 'Your campaign record is ready to export.' : home ? 'For production-game players who want clear plans, useful pauses, and an ending.' : chapter.lesson;
+  return `${header()}${demo ? demoBanner() : ''}<main id="main" class="game-main ${home ? 'home-game' : ''}">
+    <section class="game-heading ${home ? 'home-heading' : ''}">
+      <div><p class="chapter-stamp">${isEnding ? 'Campaign complete' : `Chapter ${chapter.number} of 6`}</p><h1 tabindex="-1">${pageHeading}</h1><p>${pageDescription}</p>${home ? '<ul class="game-facts" aria-label="Game facts"><li>Five-minute simulated shifts</li><li>Saves in this browser</li><li>Complete campaign is free</li></ul>' : ''}</div>
+      <div class="campaign-tools">${home ? '<a class="button sample-link" href="/demo" data-link>Try sample route</a>' : `<span>Seed ${state.seed}</span><button type="button" data-action="export-save">Export save</button><button type="button" data-action="new-campaign">New campaign</button>`}</div>
     </section>
     ${storageError ? `<div class="error-notice" role="alert">${storageError}</div>` : ''}
     ${state.status === 'ending' ? endingPanel(state) : state.status === 'dismantling' ? dismantlePanel(state) : !state.selectedContractId ? contractPicker(state) : `
@@ -345,11 +269,11 @@ function gamePage(demo: boolean): string {
 }
 
 function privacyPage(): string {
-  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your campaign stays in your browser</h1><p>Finite Foundry stores your campaign, sound choice, and optional license in local storage.</p><h2>What leaves this device</h2><p>Nothing is sent during normal play. If you add a license, the game sends that token to Sociobot once per day for verification.</p><h2>Demo data</h2><p>The demo uses separate keys that start with <code>demo:</code>. Resetting or leaving the demo deletes those keys.</p><h2>Exports</h2><p>An exported campaign is a JSON file you control. It contains the seed, route progress, and completed contract names.</p><h2>Deletion</h2><p>Choose “New campaign” to replace the current save. Clear this site’s browser storage to remove every saved setting.</p><p>Last updated: September 1, 2026.</p></main>${footer()}`;
+  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your campaign stays in your browser</h1><p>Finite Foundry stores your campaign and sound choice in local storage.</p><h2>What leaves this device</h2><p>Nothing is sent during normal play. The game has no analytics, accounts, or payment form.</p><h2>Demo data</h2><p>The demo uses separate keys that start with <code>demo:</code>. Resetting or leaving the demo deletes those keys.</p><h2>Exports</h2><p>An exported campaign is a JSON file you control. It contains the seed, route progress, and completed contract names.</p><h2>Deletion</h2><p>Choose “New campaign” to replace the current save. Clear this site’s browser storage to remove every saved setting.</p><p>Last updated: September 1, 2026.</p></main>${footer()}`;
 }
 
 function termsPage(): string {
-  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Terms</p><h1 tabindex="-1">Terms for playing Finite Foundry</h1><p>You may play, save, and export the game for personal use. The software is provided under the MIT License.</p><h2>Optional purchase</h2><p>The $5 purchase is a one-time license for twelve bonus contracts. The six-chapter campaign remains free.</p><p>Sociobot and Dodo are the merchant of record. They handle payment and refunds. A refunded license stops working.</p><h2>Availability</h2><p>The game works without an account. Browser changes or cleared storage can remove local progress, so export records you want to keep.</p><h2>Fair play</h2><p>Do not use the site to disrupt the service or test stolen license tokens.</p><p>Last updated: September 1, 2026.</p></main>${footer()}`;
+  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Terms</p><h1 tabindex="-1">Terms for playing Finite Foundry</h1><p>You may play, save, and export the game for personal use. The software is provided under the MIT License.</p><h2>Availability</h2><p>The complete six-chapter campaign is free. Bonus contracts are unavailable while operator registration is pending.</p><p>The game works without an account. Browser changes or cleared storage can remove local progress, so export records you want to keep.</p><h2>Fair play</h2><p>Do not use the site to disrupt the service.</p><p>Last updated: September 1, 2026.</p></main>${footer()}`;
 }
 
 function notFoundPage(): string {
@@ -385,7 +309,6 @@ function navigate(path: string): void {
   gameState = null;
   selectedMachine = null;
   render(true);
-  void initializeLicense(() => render(false), isDemoPath());
 }
 
 function chooseContract(id: string): void {
@@ -423,7 +346,8 @@ function exportSave(): void {
 function newCampaign(): void {
   const message = gameState?.completedChapters ? 'Replace this campaign with a new seed? Export first if you want a copy.' : 'Start this campaign again with a new seed?';
   if (!confirm(message)) return;
-  gameState = createGame(isDemoPath() ? 240319 : Math.floor(Date.now() / 1000), isDemoPath());
+  const restartFullDemo = isDemoPath() && Boolean(gameState?.completedChapters);
+  gameState = createGame(isDemoPath() ? 240319 : Math.floor(Date.now() / 1000), isDemoPath() && !restartFullDemo);
   selectedMachine = null;
   saveGame();
   render();
@@ -448,6 +372,12 @@ function bindEvents(): void {
   document.querySelector('[data-action="reset-demo"]')?.addEventListener('click', () => {
     try { localStorage.removeItem('demo:finite-foundry:save'); } catch { /* Continue with fresh memory state. */ }
     gameState = createGame(240319, true);
+    selectedMachine = null;
+    saveGame();
+    render();
+  });
+  document.querySelector('[data-action="full-demo"]')?.addEventListener('click', () => {
+    gameState = createGame(240319, false);
     selectedMachine = null;
     saveGame();
     render();
@@ -515,34 +445,8 @@ function bindEvents(): void {
     if (!gameState) return;
     gameState.status = 'ending'; saveGame(); playTone('win'); render();
   });
-  document.querySelectorAll<HTMLButtonElement>('[data-bonus]').forEach((button) => button.addEventListener('click', () => {
-    if (!gameState) return;
-    const contract = BONUS_CONTRACTS[Number(button.dataset.bonus)];
-    if (!contract || getLicenseStatus() !== 'unlocked') return;
-    gameState.chapterIndex = contract.chapterIndex;
-    gameState.selectedContractId = contract.id;
-    gameState.bonusMode = true;
-    gameState.bonusContract = contract;
-    gameState.route = Array(CHAPTERS[contract.chapterIndex]!.slots).fill(null);
-    gameState.pace = 'steady';
-    gameState.status = 'planning';
-    gameState.remainingMs = SHIFT_MS;
-    gameState.produced = 0;
-    gameState.batchProgressMs = 0;
-    saveGame();
-    render();
-  }));
   document.querySelectorAll('[data-action="export-save"]').forEach((button) => button.addEventListener('click', exportSave));
   document.querySelectorAll('[data-action="new-campaign"]').forEach((button) => button.addEventListener('click', newCampaign));
-  document.querySelector<HTMLFormElement>('[data-form="restore-license"]')?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const form = event.currentTarget as HTMLFormElement;
-    const token = new FormData(form).get('license');
-    const result = form.querySelector<HTMLElement>('.form-result')!;
-    result.textContent = 'Checking this license…';
-    const license = await restoreLicense(String(token ?? ''));
-    result.textContent = license === 'unlocked' ? 'Bonus contracts are active on this device.' : license === 'inactive' ? 'That license is not active. Check the token and try again.' : 'The license service is unavailable. Try again when you are online.';
-  });
 }
 
 function updateSimulationDisplay(): void {
@@ -632,7 +536,6 @@ addEventListener('offline', () => render(false));
 
 loadMute();
 render();
-void initializeLicense(() => { if (location.pathname === '/' || location.pathname === '/play') render(false); }, isDemoPath());
 requestAnimationFrame(loop);
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {

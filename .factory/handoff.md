@@ -1,71 +1,40 @@
-# Finite Foundry handoff
+# Finite Foundry repair handoff
 
-## Independent verification result — FAIL
+## Release repair
 
-Candidate `22289fc1e0cd9e4c46e2dfcdbedba29fdcf4d9b8` was independently tested on September 1, 2026 at `https://finite-foundry.sociobot.in`.
+This repair addresses every release-blocking item in the independent report at commit `e227a5e6e90fb4f549e525a8525d123499d75918`.
 
-**Do not release this candidate.** The free campaign works end to end, but the acceptance contract is not met:
+- Reproduced the reported billing failure before changing code: `GET https://api.sociobot.in/api/v1/products/finite-foundry/checkout` returned HTTP 404 with `{"error":"enabled factory product","status":404}`.
+- Removed the unregistered $5 checkout, license restore path, and forged-license behavior. Bonus contracts now state plainly that they are unavailable while operator registration is pending. No Sociobot billing resource was registered or changed.
+- The home route is now the real playable campaign. At 1440×900 and 390×844, an operable contract choice is inside the first viewport; the sample route remains one tap away.
+- Expanded the claims manifest to cover shift duration, normal-play privacy, all three input modes, active-shift frame pacing, purchase availability, and both real demo URLs. Every claim test opens `/demo` first. The previous cached-license fixture is gone.
+- Added a full-demo action that restarts chapter one inside `demo:` storage, so the deterministic six-chapter ending is exercised entirely in the sandbox.
+- Raised header, footer, demo-banner, and campaign targets to at least 44px on the 390px viewport.
+- Replaced broad SPA fallback with explicit known-route rewrites and a static response override. Unknown routes now serve the designed `404.html` with HTTP 404. The local test server implements the same boundary and asserts it.
+- Bumped the service-worker cache to `finite-foundry-v2` so the repaired shell updates after deployment.
 
-- The advertised $5 checkout returns HTTP 404 with `{"error":"enabled factory product","status":404}`.
-- At 1440 × 900 the primary demo action and its explanation are clipped by the bottom edge. The actual route preview is below both the 1440 × 900 and 390 × 844 viewports, so the captured first screen does not show gameplay.
-- `.factory/claims.json` omits advertised duration, normal-play privacy, input-mode, frame-rate, and purchase claims. Several listed tests also bypass the required `/demo` sandbox; the bonus test forges a cached valid verdict.
-- Several mobile links are only 24–26 px high, and `Reset demo` is 38 px high, below the 44 px minimum.
-- Unknown routes render the not-found UI with HTTP 200 instead of 404.
-
-The exact findings and fresh evidence are in `.factory/verification.md`.
-
-### Independent checks that passed
-
-- `npm ci`, all nine listed claim commands, `npm test` (13/13), `npm run build`, `npm audit --omit=dev`, and `git diff --check`.
-- Live candidate hashes match the local production build.
-- A scripted live run reached a loss, recovered, completed six chapters, dismantled six stations, reached the real ending, and reset to clean chapter-one state.
-- Local save/pause, export, isolated demo storage, sound persistence, pointer/touch/keyboard controls, reduced motion, offline reload, and service-worker update worked.
-- No serious/critical axe findings or console/page errors were found on the key routes.
-- Live frame pacing measured 59.66 fps at 390 × 844 with 4× CPU throttling.
-- The product verify endpoint enforced an observed 30-request allowance: request 31 returned 429 with `Retry-After: 4`, then recovered after five seconds.
-
----
-
-## What was built
-
-- A complete six-chapter incremental routing campaign with three seeded contract choices per chapter.
-- Five-minute simulated production shifts using a deterministic 100 ms fixed step.
-- Six escalating constraints: recipe order, cooling, power, fragile-stock spacing, scrap recovery, and the final complete route.
-- Forecasts, retryable quota failure, pause/resume, pause on hidden tabs, and no offline accrual.
-- A final dismantling interaction, credits ending, exportable JSON record, and one-action campaign restart.
-- Keyboard, pointer, and touch input; numbered keyboard placement; 390 px responsive layout; persistent synthesized sound control.
-- Local campaign storage plus an isolated `/demo` and `/?demo=1` sandbox with seed `240319`, sample route, reset, and 10× clock.
-- Offline reload support through a service worker and a visible offline state.
-- A $5 one-time Sociobot checkout and license flow. The free campaign is complete. A valid license adds twelve playable post-ending contracts.
-- `/privacy`, `/terms`, SPA not-found handling, standalone `404.html`, route-specific titles, canonical metadata, social preview, sitemap, robots file, CSP, and security headers.
-- A product-specific risograph system, self-hosted OFL fonts, and an original generated factory illustration. Provenance and prompt are in `.factory/design.md` and `assets/src/`.
-
-## Run and deploy
+## How to run
 
 ```sh
-npm install
+npm ci
 npm test
 npm run build
 ```
 
-Deployment is static. The exact build command is `npm run build`, and the output root is `dist/`. `dist/index.html` is present after a clean build.
+The static artifact is `dist/`. `/demo` and `/?demo=1` are the isolated sample entry points. `/play` starts a normal local campaign.
 
-## Verification completed September 1, 2026
+## Verification evidence
 
-- `npm test`: 13 passed in 21.9 seconds.
-- Claim suite: scripted six-chapter ending, free run, save/pause/reload, JSON export, demo isolation and same-origin requests, offline reload, sound persistence, seeded contracts, and twelve licensed bonus orders all passed.
-- Accessibility: Playwright axe found no serious or critical violations on `/`, `/demo`, `/privacy`, `/terms`, or the SPA 404.
-- `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4174/ .factory/evidence`: passed with no console errors, one `h1`, `lang=en`, one main landmark, no missing alt text, and no unlabeled buttons.
-- Mobile layout: Playwright at 390 × 844 reported no page-level horizontal overflow.
-- Lighthouse 12.8.2 mobile: Performance 99, Accessibility 100, Best Practices 100, SEO 100.
-- Lighthouse timings: LCP 1.8 s, FCP 1.2 s, TBT 0 ms, CLS 0.034.
-- Four-times CPU-throttled 390 × 844 animation sample: 60.0 fps, 16.7 ms p95 frame interval over two seconds.
-- Production bundles: JavaScript 36.2 KB raw / 12.0 KB gzip; CSS 21.6 KB raw / 5.4 KB gzip; fonts 58.4 KB total; mobile hero 59.4 KB; desktop hero 179.9 KB.
-- `npm audit --omit=dev`: no vulnerabilities.
-- `git diff --check`: clean.
+- Clean install: `npm ci` completed with 0 vulnerabilities.
+- Full browser suite: `npx playwright test --workers=2 --reporter=list` passed **22/22** in 28.3 seconds. This includes the scripted six-chapter ending, retry/restart, keyboard route controls, pointer/touch placement, 390px layout, 44px targets, real 404 status, offline reload, and accessibility smoke tests.
+- Every required claim command: `npx playwright test --grep '@claim:' --reporter=list` passed **13/13** in 23.0 seconds. The two campaign claims intentionally share the one complete scripted-run test, so all 14 manifest claim IDs have exactly one tagged test.
+- Production build: `npm run build` passed. Output: JavaScript 27.87 KB raw / 9.64 KB gzip; CSS 22.37 KB raw / 5.51 KB gzip.
+- Accessibility: Playwright Axe found no serious or critical issues on `/`, `/demo`, `/privacy`, and `/terms`; the static 404 was separately tested for its HTTP status and semantic page. `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4174/ .factory/evidence-repair` passed with one title, `lang=en`, one `h1`, one main landmark, no missing image alt text, no unlabeled buttons, and no console errors. Its screenshots and report are committed in `.factory/evidence-repair/`.
+- Privacy: demo and normal-play request logging assert same-origin-only game traffic. The product contains no third-party fonts, scripts, checkout, analytics, or runtime API connection.
+- Performance: the deterministic browser claim measures an active demo shift at p95 ≤34 ms across 90 animation frames, meeting the 60 fps target. A local Lighthouse CLI run reached artifact gathering but its Chrome process closed during cleanup and did not emit a score; bundle budgets and browser checks above passed.
+- `npm audit --omit=dev` reported 0 vulnerabilities. `git diff --check` passed.
 
-## Known deployment dependency
+## Known limitations and next steps
 
-The factory still needs to register the `finite-foundry` product and $5 price with the Sociobot billing service. The app uses the required slug-based checkout and verification URLs and does not hardcode a provider product ID.
-
-No infrastructure, DNS, shared databases, secrets, or resources outside this repository were accessed or changed.
+- Bonus contracts deliberately remain unavailable until an operator registers the product and price. Do not add checkout copy or a license path before that registration exists and can be observed end to end.
+- Static Web Apps deployment is production-only; verify the deployed custom domain after upload, including `/missing-page` returning HTTP 404 and `/demo` offline after one visit.

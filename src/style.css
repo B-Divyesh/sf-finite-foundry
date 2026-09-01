@@ -133,9 +133,10 @@ code { padding: 2px 5px; background: #e5d5b6; font-family: ui-monospace, monospa
   border-bottom: 3px solid var(--ink);
 }
 
-.wordmark { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 700; text-decoration: none; }
+.wordmark { display: inline-flex; min-height: 44px; align-items: center; gap: 10px; color: var(--ink); font-weight: 700; text-decoration: none; }
 .wordmark span { display: grid; width: 40px; height: 40px; place-items: center; background: var(--ink); color: var(--paper); font-family: 'Bowlby One SC', sans-serif; font-size: 0.95rem; transform: rotate(-2deg); }
 .site-header nav, .site-footer nav { display: flex; align-items: center; gap: 24px; }
+.site-header nav a, .site-footer nav a { display: inline-flex; min-height: 44px; align-items: center; }
 .site-header nav a { color: var(--ink); font-weight: 700; }
 .sound-button { min-width: 96px; box-shadow: none; padding-inline: 12px; }
 .network-notice { padding: 10px 16px; border-bottom: 3px solid var(--ink); background: var(--ochre); color: var(--ink); text-align: center; font-weight: 700; }
@@ -230,7 +231,6 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
 .paid { display: grid; grid-template-columns: 1fr 0.9fr; gap: 64px; margin-bottom: 96px; padding: clamp(32px, 5vw, 64px); background-color: var(--ink); color: var(--white); background-image: radial-gradient(rgba(243, 232, 206, 0.16) 1px, transparent 1px); background-size: 9px 9px; }
 .paid::after { box-shadow: inset 0 0 0 6px var(--ink); }
 .paid .eyebrow { color: #ff8174; }
-.license-state { color: #d9d8e0; }
 .purchase-actions { display: grid; align-content: center; gap: 28px; }
 .purchase-actions form { display: grid; gap: 8px; }
 .purchase-actions form > div { display: flex; gap: 8px; }
@@ -264,7 +264,7 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
   background: var(--ochre);
   color: var(--ink);
 }
-.demo-banner button, .demo-banner a { min-height: 38px; padding: 7px 12px; border: 2px solid var(--ink); background: var(--paper-light); color: var(--ink); font-weight: 700; }
+.demo-banner button, .demo-banner a { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 7px 12px; border: 2px solid var(--ink); background: var(--paper-light); color: var(--ink); font-weight: 700; }
 
 .game-main { display: grid; gap: 40px; padding-top: 48px; }
 .game-heading { display: flex; align-items: end; justify-content: space-between; gap: 32px; }
@@ -273,6 +273,10 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
 .campaign-tools { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px; }
 .campaign-tools span { padding: 9px 12px; border: 2px dashed var(--ink); font-variant-numeric: tabular-nums; }
 .campaign-tools button { box-shadow: none; }
+.campaign-tools .sample-link { box-shadow: none; }
+.game-facts { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 16px 0 0; padding: 0; list-style: none; font-size: 0.94rem; font-weight: 700; }
+.game-facts li::before { content: '■'; margin-right: 7px; color: var(--teal); font-size: 0.75em; }
+.availability-note { margin: 28px 0 0; padding: 16px; border-left: 5px solid var(--ochre); background: #eee0bd; }
 
 .error-notice { padding: 16px 20px; border: 3px solid var(--danger); background: var(--paper-light); color: var(--danger); font-weight: 700; }
 
@@ -424,6 +428,12 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
   .demo-banner { position: static; align-items: stretch; flex-direction: column; gap: 8px; }
   .demo-banner button, .demo-banner a { width: 100%; text-align: center; }
   .game-main { gap: 28px; padding-top: 32px; }
+  .home-game { gap: 16px; padding-top: 16px; }
+  .home-heading h1 { font-size: 2rem; }
+  .home-heading .game-facts { gap: 4px 10px; margin-top: 10px; font-size: 0.87rem; }
+  .home-heading .campaign-tools { display: flex; }
+  .home-heading .sample-link { width: 100%; justify-content: center; }
+  .home-game .contract-picker { padding-top: 16px; }
   .game-heading h1 { font-size: 2.4rem; }
   .campaign-tools { display: grid; grid-template-columns: 1fr 1fr; }
   .campaign-tools span { grid-column: 1 / -1; }

@@ -1,14 +1,14 @@
 # Finite Foundry
 
-Plan six factory routes and finish a campaign in one or two evenings. Finite Foundry is a browser game for incremental-game players who want useful planning breaks, a clear ending, and no prestige loop.
+Plan six factory routes and finish a campaign. Finite Foundry is a browser game for incremental-game players who want useful planning breaks, a clear ending, and no prestige loop.
 
 Each chapter gives you three deterministic contracts. Choose an order, arrange machines around one new constraint, and run a five-minute simulated shift. Production pauses when the tab closes or hides. The intended session is six timed shifts plus untimed planning.
 
-The full campaign is free. It has no ads, energy limits, loot boxes, paid progress, or offline accrual. A $5 one-time license adds twelve harder one-shift contracts after the ending.
+The complete six-chapter campaign is free. It has no ads, energy limits, loot boxes, paid progress, or offline accrual. Bonus contracts are unavailable while operator registration is pending.
 
 ## Try the sample campaign
 
-Open `/demo` or visit <https://finite-foundry.sociobot.in/demo>. It starts in chapter two with a complete route and a 10× demo clock. The demo uses `demo:` local-storage keys and never reads or writes the real campaign save.
+Open `/demo` or visit <https://finite-foundry.sociobot.in/demo>. It starts in chapter two with a complete route and a 10× demo clock. Choose **Play full demo** to restart at chapter one inside the same isolated sample storage. The demo uses `demo:` local-storage keys and never reads or writes the real campaign save.
 
 ## Controls
 
@@ -44,9 +44,7 @@ npm run build
 
 ## Privacy and payment
 
-Normal play has no account and sends no game data to another origin. Progress and sound settings use local storage. License holders contact `api.sociobot.in` at most once per day to verify a saved token. See `/privacy` and `/terms`.
-
-Checkout uses the Sociobot billing API. The app never embeds a payment provider or stores payment details.
+Normal play has no account and sends no game data to another origin. Progress and sound settings use local storage. The game has no analytics, checkout, or payment form while bonus contracts are unavailable. See `/privacy` and `/terms`.
 
 ## Technical notes
 
