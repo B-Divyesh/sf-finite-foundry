@@ -196,10 +196,19 @@ export function seededRandom(seed: number): () => number {
   };
 }
 
+function shuffled<T>(values: readonly T[], random: () => number): T[] {
+  const items = [...values];
+  for (let index = items.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [items[index], items[swapIndex]] = [items[swapIndex]!, items[index]!];
+  }
+  return items;
+}
+
 export function contractsForChapter(seed: number, chapterIndex: number): Contract[] {
   const random = seededRandom(seed + chapterIndex * 7919);
-  const names = [...(CLIENTS[chapterIndex] ?? CLIENTS[0]!)].sort(() => random() - 0.5).slice(0, 3);
-  const quotas = [20, 23, 27].sort(() => random() - 0.5);
+  const names = shuffled(CLIENTS[chapterIndex] ?? CLIENTS[0]!, random).slice(0, 3);
+  const quotas = shuffled([20, 23, 27], random);
   const marks = ['●', '▲', '■'];
   return names.map((client, index) => ({
     id: `${chapterIndex + 1}-${index}-${client.toLowerCase().replace(/[^a-z]+/g, '-')}`,

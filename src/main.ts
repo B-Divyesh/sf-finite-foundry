@@ -123,6 +123,7 @@ function setMeta(path: string): void {
 
 function header(): string {
   return `
+    <div id="route-announcer" class="sr-only" role="status" aria-live="polite"></div>
     <header class="site-header">
       <a class="wordmark" href="/" data-link aria-label="Finite Foundry home"><span aria-hidden="true">FF</span> Finite Foundry</a>
       <nav aria-label="Main navigation">
@@ -172,6 +173,7 @@ function landing(): string {
             <source media="(max-width: 700px)" srcset="/assets/foundry-hero-768.webp" />
             <img src="/assets/foundry-hero-1280.webp" width="1280" height="853" alt="A compact paper factory shows the kind of route you will build." fetchpriority="high" decoding="async" />
           </picture>
+          <figcaption class="hero-route-card"><span>Sample route ready</span><ol><li>CUT</li><li>HEAT</li><li>COOL</li><li>PRESS</li></ol><strong>Forecast: 25 / 23 units</strong></figcaption>
         </figure>
       </section>
 
@@ -212,7 +214,7 @@ function landing(): string {
           <p class="license-state" aria-live="polite">${license === 'unlocked' ? 'Bonus contracts are active on this device.' : license === 'inactive' ? 'This license is no longer active.' : license === 'checking' ? 'Checking the saved license…' : 'No bonus license is saved on this device.'}</p>
         </div>
         <div class="purchase-actions">
-          <a class="button primary" href="https://api.sociobot.in/api/v1/products/finite-foundry/checkout">Buy bonus contracts — $5</a>
+          <a class="button primary" href="https://api.sociobot.in/api/v1/products/finite-foundry/checkout">Buy bonus contracts — $5 at Sociobot</a>
           <form data-form="restore-license">
             <label for="license-token">Have a license?</label>
             <div><input id="license-token" name="license" autocomplete="off" required /><button type="submit">Restore license</button></div>
@@ -318,7 +320,7 @@ function endingPanel(state: GameState): string {
     <div class="ending-actions"><button class="button primary" type="button" data-action="new-campaign">Start another campaign</button><button type="button" data-action="export-save">Export campaign record</button></div>
   </section>
   <section class="bonus-board" aria-labelledby="bonus-title"><div><p class="eyebrow">Optional set</p><h2 id="bonus-title">Twelve bonus contracts</h2><p>${unlocked ? 'Choose any harder one-shift order. Completed orders join this campaign record.' : 'A $5 one-time license adds twelve harder one-shift orders.'}</p></div>
-    ${unlocked ? `<div class="bonus-list">${BONUS_CONTRACTS.map((contract, index) => `<button type="button" data-bonus="${index}"><span>${String(index + 1).padStart(2, '0')}</span><strong>${contract.client}</strong><small>${contract.product} · ${contract.quota} units</small></button>`).join('')}</div>` : '<a class="button primary" href="https://api.sociobot.in/api/v1/products/finite-foundry/checkout">Buy bonus contracts — $5</a>'}
+    ${unlocked ? `<div class="bonus-list">${BONUS_CONTRACTS.map((contract, index) => `<button type="button" data-bonus="${index}"><span>${String(index + 1).padStart(2, '0')}</span><strong>${contract.client}</strong><small>${contract.product} · ${contract.quota} units</small></button>`).join('')}</div>` : '<a class="button primary" href="https://api.sociobot.in/api/v1/products/finite-foundry/checkout">Buy bonus contracts — $5 at Sociobot</a>'}
   </section>`;
 }
 
@@ -366,7 +368,12 @@ function render(announce = false): void {
   bindEvents();
   if (announce) {
     scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-    requestAnimationFrame(() => document.querySelector<HTMLHeadingElement>('h1')?.focus());
+    requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLHeadingElement>('h1');
+      const announcer = document.querySelector<HTMLElement>('#route-announcer');
+      heading?.focus();
+      if (announcer && heading) announcer.textContent = heading.textContent;
+    });
   }
 }
 
@@ -581,7 +588,24 @@ function loop(now: number): void {
 }
 
 document.addEventListener('keydown', (event) => {
-  if (!gameState || gameState.status !== 'planning' || !selectedMachine) return;
+  if (!gameState || gameState.status !== 'planning') return;
+  const focusedSlot = (document.activeElement as HTMLElement | null)?.dataset.slot;
+  if (focusedSlot !== undefined && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+    event.preventDefault();
+    const direction = event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 1;
+    const nextIndex = Math.max(0, Math.min(gameState.route.length - 1, Number(focusedSlot) + direction));
+    document.querySelector<HTMLButtonElement>(`[data-slot="${nextIndex}"]`)?.focus();
+    return;
+  }
+  if (focusedSlot !== undefined && (event.key === 'Delete' || event.key === 'Backspace')) {
+    event.preventDefault();
+    gameState.route[Number(focusedSlot)] = null;
+    saveGame();
+    playTone('remove');
+    render();
+    return;
+  }
+  if (!selectedMachine) return;
   const index = Number(event.key) - 1;
   if (index >= 0 && index < gameState.route.length) {
     event.preventDefault();

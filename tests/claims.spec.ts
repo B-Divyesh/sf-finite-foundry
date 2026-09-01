@@ -84,7 +84,7 @@ test('@claim:demo-isolation keeps sample data separate and sends no cross-origin
   });
   await page.goto('/play');
   await page.evaluate(() => localStorage.setItem('finite-foundry:marker', 'real-campaign'));
-  await page.goto('/demo');
+  await page.goto('/?demo=1');
   await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
   await page.locator('[data-action="reset-demo"]').click();
   expect(await page.evaluate(() => localStorage.getItem('finite-foundry:marker'))).toBe('real-campaign');
@@ -118,7 +118,7 @@ test('@claim:sound-setting keeps the mute choice after reload', async ({ page })
 test('@claim:bonus-contracts shows twelve playable orders with a valid cached license', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Add twelve bonus contracts for $5 once' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Buy bonus contracts — $5' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/finite-foundry/checkout');
+  await expect(page.getByRole('link', { name: 'Buy bonus contracts — $5 at Sociobot' })).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/finite-foundry/checkout');
   await page.goto('/play');
   await page.evaluate(() => {
     localStorage.setItem('sb_license:finite-foundry', 'test-token');
@@ -156,4 +156,19 @@ test('the game fits a 390px viewport without page overflow', async ({ browser })
   await page.goto('http://127.0.0.1:4174/demo');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await context.close();
+});
+
+test('keyboard controls place, move between, and clear route slots', async ({ page }) => {
+  await page.goto('/play');
+  await chooseLowestQuota(page);
+  await page.locator('[data-machine="cutter"]').focus();
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('1');
+  await expect(page.locator('[data-slot="0"]')).toHaveAttribute('aria-label', /Cutter/);
+  await page.locator('[data-slot="0"]').focus();
+  await page.keyboard.press('ArrowRight');
+  expect(await page.evaluate(() => (document.activeElement as HTMLElement).dataset.slot)).toBe('1');
+  await page.locator('[data-slot="0"]').focus();
+  await page.keyboard.press('Delete');
+  await expect(page.locator('[data-slot="0"]')).toHaveAttribute('aria-label', /empty/);
 });

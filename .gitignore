@@ -5,4 +5,5 @@ dist/
 graphify-out/
 test-results/
 test-report/
+.factory/evidence/
 .DS_Store

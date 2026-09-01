@@ -18,6 +18,9 @@ Audited September 1, 2026. Counts treat hyphenated terms and currency values as 
 | Campaign saves in this browser | 5 | pass |
 | Works offline after the first visit | 6 | pass |
 | Full campaign is free | 4 | pass |
+| Sample route ready | 3 | pass |
+| CUT · HEAT · COOL · PRESS | 4 | pass |
+| Forecast: 25 / 23 units | 4 | pass |
 | Chapter 2 of 6 | 4 | pass |
 | See the route before you run it | 7 | pass |
 | The recipe needs heat. | 4 | pass |
@@ -44,7 +47,7 @@ Audited September 1, 2026. Counts treat hyphenated terms and currency values as 
 | The free campaign stays complete. | 5 | pass |
 | The bonus set adds harder seeded orders after the ending. | 10 | pass |
 | No bonus license is saved on this device. | 8 | pass |
-| Buy bonus contracts — $5 | 4 | pass |
+| Buy bonus contracts — $5 at Sociobot | 6 | pass |
 | Have a license? | 3 | pass |
 | Restore license | 2 | pass |
 | Plan six routes. | 3 | pass |
