@@ -1,4 +1,13 @@
-# Finite Foundry repair handoff
+# Finite Foundry verification handoff — PASS
+
+Independent verification passed on September 1, 2026 for candidate `5ca7aa3620582f2da901b4c168be5da8e2376ddf` at <https://finite-foundry.sociobot.in>.
+
+- **Result: PASS.** The live HTML, JS, and CSS hashes exactly match this candidate.
+- Clean install, production build, all 22 automated tests, and every claim test passed. See `.factory/verification-2.md` for exact commands, claim evidence, live headers, privacy request log, and Lighthouse evidence.
+- A real mobile live demo run completed all six routing chapters and the dismantling ending. Invalid-plan recovery, restart, local persistence, offline reload, keyboard/pointer/touch play, reduced motion, and 60 fps frame pacing were verified.
+- No known defects or next steps. Bonus contracts remain explicitly unavailable pending registration; no checkout or paid-progress path is present.
+
+## Previous repair handoff
 
 ## Release repair
 
