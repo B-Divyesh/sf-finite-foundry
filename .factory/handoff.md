@@ -1,5 +1,31 @@
 # Finite Foundry handoff
 
+## Independent verification result — FAIL
+
+Candidate `22289fc1e0cd9e4c46e2dfcdbedba29fdcf4d9b8` was independently tested on September 1, 2026 at `https://finite-foundry.sociobot.in`.
+
+**Do not release this candidate.** The free campaign works end to end, but the acceptance contract is not met:
+
+- The advertised $5 checkout returns HTTP 404 with `{"error":"enabled factory product","status":404}`.
+- At 1440 × 900 the primary demo action and its explanation are clipped by the bottom edge. The actual route preview is below both the 1440 × 900 and 390 × 844 viewports, so the captured first screen does not show gameplay.
+- `.factory/claims.json` omits advertised duration, normal-play privacy, input-mode, frame-rate, and purchase claims. Several listed tests also bypass the required `/demo` sandbox; the bonus test forges a cached valid verdict.
+- Several mobile links are only 24–26 px high, and `Reset demo` is 38 px high, below the 44 px minimum.
+- Unknown routes render the not-found UI with HTTP 200 instead of 404.
+
+The exact findings and fresh evidence are in `.factory/verification.md`.
+
+### Independent checks that passed
+
+- `npm ci`, all nine listed claim commands, `npm test` (13/13), `npm run build`, `npm audit --omit=dev`, and `git diff --check`.
+- Live candidate hashes match the local production build.
+- A scripted live run reached a loss, recovered, completed six chapters, dismantled six stations, reached the real ending, and reset to clean chapter-one state.
+- Local save/pause, export, isolated demo storage, sound persistence, pointer/touch/keyboard controls, reduced motion, offline reload, and service-worker update worked.
+- No serious/critical axe findings or console/page errors were found on the key routes.
+- Live frame pacing measured 59.66 fps at 390 × 844 with 4× CPU throttling.
+- The product verify endpoint enforced an observed 30-request allowance: request 31 returned 429 with `Retry-After: 4`, then recovered after five seconds.
+
+---
+
 ## What was built
 
 - A complete six-chapter incremental routing campaign with three seeded contract choices per chapter.
