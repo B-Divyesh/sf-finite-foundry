@@ -4,6 +4,8 @@
 
 This repair addresses every release-blocking item in the independent report at commit `e227a5e6e90fb4f549e525a8525d123499d75918`.
 
+Repair commit: `5ca7aa3620582f2da901b4c168be5da8e2376ddf`.
+
 - Reproduced the reported billing failure before changing code: `GET https://api.sociobot.in/api/v1/products/finite-foundry/checkout` returned HTTP 404 with `{"error":"enabled factory product","status":404}`.
 - Removed the unregistered $5 checkout, license restore path, and forged-license behavior. Bonus contracts now state plainly that they are unavailable while operator registration is pending. No Sociobot billing resource was registered or changed.
 - The home route is now the real playable campaign. At 1440×900 and 390×844, an operable contract choice is inside the first viewport; the sample route remains one tap away.
@@ -33,6 +35,12 @@ The static artifact is `dist/`. `/demo` and `/?demo=1` are the isolated sample e
 - Privacy: demo and normal-play request logging assert same-origin-only game traffic. The product contains no third-party fonts, scripts, checkout, analytics, or runtime API connection.
 - Performance: the deterministic browser claim measures an active demo shift at p95 ≤34 ms across 90 animation frames, meeting the 60 fps target. A local Lighthouse CLI run reached artifact gathering but its Chrome process closed during cleanup and did not emit a score; bundle budgets and browser checks above passed.
 - `npm audit --omit=dev` reported 0 vulnerabilities. `git diff --check` passed.
+
+## Deployment
+
+- Deployed the committed `dist/` with `/opt/fleet/lib/deploy-static.sh finite-foundry dist` to the product-scoped `sf-finite-foundry` Static Web App. Deployment ID: `8987d945-867b-4cb4-a175-c526d499f1a7`.
+- Live identity check: the live JavaScript asset is `/assets/index-BC258Zfe.js`, exactly matching this build.
+- Live checks passed on September 1, 2026: `/` HTTP 200, `/demo` HTTP 200, `/missing-page` HTTP 404, and `verify-url.sh` found no console errors or basic semantic/accessibility failures at `https://finite-foundry.sociobot.in/`.
 
 ## Known limitations and next steps
 
