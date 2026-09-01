@@ -1,0 +1,65 @@
+[
+  {
+    "id": "seeded-contracts",
+    "claim": "Each chapter offers three deterministic contracts that vary with the campaign seed.",
+    "where": "landing how-it-works, game contract picker, README",
+    "test": "npm test -- --grep @claim:seeded-contracts",
+    "sandbox": "deterministic core with two seeds; compare three generated contract records"
+  },
+  {
+    "id": "campaign-ending",
+    "claim": "Six routing chapters reach a final ending, and a new campaign returns to chapter one.",
+    "where": "landing page, game, README",
+    "test": "npm test -- --grep @claim:campaign-ending",
+    "sandbox": "fresh browser context; scripted routes; accelerated simulated clock"
+  },
+  {
+    "id": "finite-free-run",
+    "claim": "The full campaign has no prestige reset, ads, energy limits, loot boxes, or paid progress.",
+    "where": "landing facts, exclusions, paid section, README",
+    "test": "npm test -- --grep @claim:finite-free-run",
+    "sandbox": "fresh browser context without a license; completes every chapter"
+  },
+  {
+    "id": "local-save-pause",
+    "claim": "Campaign progress saves in this browser, and production does not advance while closed.",
+    "where": "landing facts, game pause state, privacy, README",
+    "test": "npm test -- --grep @claim:local-save-pause",
+    "sandbox": "fresh browser context; start a real-clock shift; reload; compare paused timer"
+  },
+  {
+    "id": "export-json",
+    "claim": "Players can export a campaign record as JSON at any time.",
+    "where": "game toolbar, privacy, README",
+    "test": "npm test -- --grep @claim:export-json",
+    "sandbox": "demo seed; capture download; parse product and seed"
+  },
+  {
+    "id": "demo-isolation",
+    "claim": "The demo uses separate sample storage and sends no game data to another origin.",
+    "where": "demo banner, privacy, README",
+    "test": "npm test -- --grep @claim:demo-isolation",
+    "sandbox": "fresh browser context; preserve a real marker; inspect every outgoing request"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "Works offline after the first visit.",
+    "where": "landing facts, README",
+    "test": "npm test -- --grep @claim:offline-reload",
+    "sandbox": "new browser context; load demo; wait for service worker; set context offline; reload"
+  },
+  {
+    "id": "sound-setting",
+    "claim": "The sound setting persists in the browser.",
+    "where": "game header, README",
+    "test": "npm test -- --grep @claim:sound-setting",
+    "sandbox": "fresh demo storage; mute; reload; assert muted control state"
+  },
+  {
+    "id": "bonus-contracts",
+    "claim": "A valid $5 one-time license adds twelve playable bonus contracts after the ending.",
+    "where": "paid section, terms, ending, README",
+    "test": "npm test -- --grep @claim:bonus-contracts",
+    "sandbox": "cached valid test verdict and completed local campaign; count orders and open one"
+  }
+]

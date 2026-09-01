@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://finite-foundry.sociobot.in/sitemap.xml

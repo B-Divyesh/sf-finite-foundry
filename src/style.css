@@ -81,8 +81,8 @@ button, .button {
 button:hover, .button:hover { background: #fffdf6; transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
 button:active, .button:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
 button:disabled { cursor: not-allowed; opacity: 0.52; transform: none; box-shadow: none; }
-.button.primary { background: var(--coral); color: var(--white); }
-.button.primary:hover { background: var(--coral-dark); }
+.button.primary { background: var(--coral-dark); color: var(--white); }
+.button.primary:hover { background: var(--ink); }
 
 a { color: var(--teal-dark); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 a:hover { color: var(--coral-dark); }
@@ -138,6 +138,7 @@ code { padding: 2px 5px; background: #e5d5b6; font-family: ui-monospace, monospa
 .site-header nav, .site-footer nav { display: flex; align-items: center; gap: 24px; }
 .site-header nav a { color: var(--ink); font-weight: 700; }
 .sound-button { min-width: 96px; box-shadow: none; padding-inline: 12px; }
+.network-notice { padding: 10px 16px; border-bottom: 3px solid var(--ink); background: var(--ochre); color: var(--ink); text-align: center; font-weight: 700; }
 
 main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
 
@@ -287,7 +288,7 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
 .machine-bank h2, .route-board h2 { margin-bottom: 7px; font-size: 1.65rem; }
 .machine-cards { display: flex; gap: 12px; overflow-x: auto; padding: 4px 8px 9px 4px; scrollbar-color: var(--ink) transparent; }
 .machine-card { display: grid; min-width: 146px; min-height: 160px; align-content: space-between; justify-items: start; padding: 14px; text-align: left; }
-.machine-card.selected { background: var(--coral); color: var(--white); transform: translate(-3px, -3px) rotate(-1deg); box-shadow: 7px 7px 0 var(--ink); }
+.machine-card.selected { background: var(--coral-dark); color: var(--white); transform: translate(-3px, -3px) rotate(-1deg); box-shadow: 7px 7px 0 var(--ink); }
 .machine-card small { min-height: 40px; margin-top: 10px; line-height: 1.2; }
 .machine-code { color: var(--coral-dark); font-family: 'Bowlby One SC', sans-serif; font-size: 0.78rem; letter-spacing: 0.08em; }
 .machine-card.selected .machine-code { color: var(--white); }
@@ -342,7 +343,7 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
 
 .dismantle, .ending { margin-bottom: 48px; padding: clamp(32px, 6vw, 72px); }
 .dismantle-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 32px 0; }
-.dismantle-list button { display: grid; min-height: 110px; gap: 10px; justify-items: start; background: var(--coral); color: var(--white); text-align: left; }
+.dismantle-list button { display: grid; min-height: 110px; gap: 10px; justify-items: start; background: var(--coral-dark); color: var(--white); text-align: left; }
 .dismantle-list span { font-family: 'Bowlby One SC', sans-serif; }
 .ending { max-width: 880px; }
 .ending-mark { color: var(--coral); font-size: 2.4rem; letter-spacing: 0.6em; }
@@ -351,6 +352,11 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
 .ending dt { color: var(--ink-muted); }
 .ending dd { margin: 0; font-size: 1.5rem; font-weight: 700; }
 .ending-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+
+.bonus-board { display: grid; grid-template-columns: 0.55fr 1.45fr; gap: 40px; margin-bottom: 48px; padding: 40px 0; border-block: 3px solid var(--ink); }
+.bonus-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.bonus-list button { display: grid; min-height: 126px; align-content: space-between; justify-items: start; text-align: left; }
+.bonus-list span { color: var(--coral-dark); font-family: 'Bowlby One SC', sans-serif; }
 
 .legal { max-width: 850px; margin-top: 48px; padding: clamp(32px, 6vw, 72px); }
 .legal h1 { max-width: 13ch; font-size: clamp(2.2rem, 5.5vw, 4rem); }
@@ -380,6 +386,7 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
   .route-slots { grid-template-columns: repeat(3, 1fr); }
   .route-slots li:nth-child(3)::after { display: none; }
   .contract-picker { grid-template-columns: 1fr; }
+  .bonus-board { grid-template-columns: 1fr; }
   .controls-grid { grid-template-columns: 1fr; }
 }
 
@@ -437,6 +444,7 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
   .dismantle, .ending { padding: 30px 22px; }
   .dismantle-list { grid-template-columns: 1fr; }
   .ending dl { grid-template-columns: 1fr; }
+  .bonus-list { grid-template-columns: 1fr 1fr; }
   .not-found { grid-template-columns: 1fr; gap: 30px; }
   .empty-machine { min-height: 270px; }
 }

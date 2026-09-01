@@ -1,6 +1,7 @@
 import './style.css';
 import {
   activeRoute,
+  BONUS_CONTRACTS,
   CHAPTERS,
   contractsForChapter,
   createGame,
@@ -31,6 +32,7 @@ let storageError = '';
 let lastFrame = performance.now();
 let accumulator = 0;
 let lastDisplayUpdate = 0;
+let lastSaveUpdate = 0;
 let muted = false;
 let audioContext: AudioContext | null = null;
 
@@ -43,7 +45,7 @@ function safeLoad(): GameState | null {
     if (parsed.status === 'running') parsed.status = 'paused';
     return parsed;
   } catch {
-    storageError = 'The saved campaign could not be read. Start a new campaign or import a valid record.';
+    storageError = 'The saved campaign could not be read. Choose New campaign to replace it.';
     return null;
   }
 }
@@ -129,7 +131,7 @@ function header(): string {
         <a href="/privacy" data-link>Privacy</a>
       </nav>
       <button class="sound-button" type="button" data-action="sound" aria-pressed="${muted}">${muted ? 'Sound off' : 'Sound on'}</button>
-    </header>`;
+    </header>${navigator.onLine ? '' : '<div class="network-notice" role="status">Offline. The campaign still works; license checks wait for a connection.</div>'}`;
 }
 
 function footer(): string {
@@ -160,8 +162,8 @@ function landing(): string {
           </div>
           <a class="text-action" href="/play" data-link>Start a new campaign</a>
           <ul class="plain-facts" aria-label="Game facts">
-            <li>Six five-minute simulated shifts</li>
             <li>Campaign saves in this browser</li>
+            <li>Works offline after the first visit</li>
             <li>Full campaign is free</li>
           </ul>
         </div>
@@ -296,7 +298,7 @@ function planPanel(state: GameState): string {
 
 function resultPanel(state: GameState): string {
   const contract = selectedContract(state)!;
-  if (state.status === 'won') return `<section class="result-panel won" aria-labelledby="result-title"><p class="result-mark" aria-hidden="true">✓</p><div><h2 id="result-title">Contract complete</h2><p>You made ${Math.floor(state.produced)} units for ${contract.client}.</p></div><button class="button primary" type="button" data-action="next-chapter">${state.chapterIndex === 5 ? 'Dismantle the machine' : 'Plan the next chapter'}</button></section>`;
+  if (state.status === 'won') return `<section class="result-panel won" aria-labelledby="result-title"><p class="result-mark" aria-hidden="true">✓</p><div><h2 id="result-title">Contract complete</h2><p>You made ${Math.floor(state.produced)} units for ${contract.client}.</p></div><button class="button primary" type="button" data-action="next-chapter">${state.bonusMode ? 'Return to bonus contracts' : state.chapterIndex === 5 ? 'Dismantle the machine' : 'Plan the next chapter'}</button></section>`;
   if (state.status === 'lost') return `<section class="result-panel lost" aria-labelledby="result-title"><p class="result-mark" aria-hidden="true">×</p><div><h2 id="result-title">Quota missed</h2><p>You made ${Math.floor(state.produced)} of ${contract.quota} units. Change the pace or choose another contract.</p></div><button class="button primary" type="button" data-action="retry-shift">Replan this shift</button></section>`;
   return '';
 }
@@ -310,9 +312,13 @@ function dismantlePanel(state: GameState): string {
 }
 
 function endingPanel(state: GameState): string {
+  const unlocked = getLicenseStatus() === 'unlocked';
   return `<section class="ending paper-section" aria-labelledby="ending-title"><p class="ending-mark" aria-hidden="true">■ ● ▲</p><h2 id="ending-title">Six shifts. One finished machine.</h2><p>You completed every contract and took the foundry apart. There is no prestige reset.</p>
     <dl><div><dt>Campaign seed</dt><dd>${state.seed}</dd></div><div><dt>Contracts filled</dt><dd>${state.history.length}</dd></div><div><dt>Attempts</dt><dd>${state.attempts}</dd></div></dl>
     <div class="ending-actions"><button class="button primary" type="button" data-action="new-campaign">Start another campaign</button><button type="button" data-action="export-save">Export campaign record</button></div>
+  </section>
+  <section class="bonus-board" aria-labelledby="bonus-title"><div><p class="eyebrow">Optional set</p><h2 id="bonus-title">Twelve bonus contracts</h2><p>${unlocked ? 'Choose any harder one-shift order. Completed orders join this campaign record.' : 'A $5 one-time license adds twelve harder one-shift orders.'}</p></div>
+    ${unlocked ? `<div class="bonus-list">${BONUS_CONTRACTS.map((contract, index) => `<button type="button" data-bonus="${index}"><span>${String(index + 1).padStart(2, '0')}</span><strong>${contract.client}</strong><small>${contract.product} · ${contract.quota} units</small></button>`).join('')}</div>` : '<a class="button primary" href="https://api.sociobot.in/api/v1/products/finite-foundry/checkout">Buy bonus contracts — $5</a>'}
   </section>`;
 }
 
@@ -351,11 +357,12 @@ function notFoundPage(): string {
 function render(announce = false): void {
   loadMute();
   const path = location.pathname;
+  const queryDemo = path === '/' && isDemoPath();
   const known = Object.hasOwn(routeMeta, path);
-  const normalizedPath = known ? path : '/404';
+  const normalizedPath = queryDemo ? '/demo' : known ? path : '/404';
   setMeta(normalizedPath);
-  if (path !== '/play' && path !== '/demo') gameState = null;
-  app.innerHTML = path === '/' ? landing() : path === '/play' ? gamePage(false) : path === '/demo' ? gamePage(true) : path === '/privacy' ? privacyPage() : path === '/terms' ? termsPage() : notFoundPage();
+  if (path !== '/play' && path !== '/demo' && !queryDemo) gameState = null;
+  app.innerHTML = queryDemo ? gamePage(true) : path === '/' ? landing() : path === '/play' ? gamePage(false) : path === '/demo' ? gamePage(true) : path === '/privacy' ? privacyPage() : path === '/terms' ? termsPage() : notFoundPage();
   bindEvents();
   if (announce) {
     scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
@@ -364,7 +371,7 @@ function render(announce = false): void {
 }
 
 function navigate(path: string): void {
-  if (location.pathname === '/demo' && path !== '/demo') {
+  if (isDemoPath() && path !== '/demo') {
     try { localStorage.removeItem('demo:finite-foundry:save'); } catch { /* Storage may be unavailable. */ }
   }
   history.pushState({}, '', path);
@@ -501,11 +508,28 @@ function bindEvents(): void {
     if (!gameState) return;
     gameState.status = 'ending'; saveGame(); playTone('win'); render();
   });
+  document.querySelectorAll<HTMLButtonElement>('[data-bonus]').forEach((button) => button.addEventListener('click', () => {
+    if (!gameState) return;
+    const contract = BONUS_CONTRACTS[Number(button.dataset.bonus)];
+    if (!contract || getLicenseStatus() !== 'unlocked') return;
+    gameState.chapterIndex = contract.chapterIndex;
+    gameState.selectedContractId = contract.id;
+    gameState.bonusMode = true;
+    gameState.bonusContract = contract;
+    gameState.route = Array(CHAPTERS[contract.chapterIndex]!.slots).fill(null);
+    gameState.pace = 'steady';
+    gameState.status = 'planning';
+    gameState.remainingMs = SHIFT_MS;
+    gameState.produced = 0;
+    gameState.batchProgressMs = 0;
+    saveGame();
+    render();
+  }));
   document.querySelectorAll('[data-action="export-save"]').forEach((button) => button.addEventListener('click', exportSave));
   document.querySelectorAll('[data-action="new-campaign"]').forEach((button) => button.addEventListener('click', newCampaign));
   document.querySelector<HTMLFormElement>('[data-form="restore-license"]')?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const form = event.currentTarget;
+    const form = event.currentTarget as HTMLFormElement;
     const token = new FormData(form).get('license');
     const result = form.querySelector<HTMLElement>('.form-result')!;
     result.textContent = 'Checking this license…';
@@ -532,7 +556,7 @@ function loop(now: number): void {
     accumulator += elapsed;
     const scale = isTestClock() ? 600 : isDemoPath() ? 10 : 1;
     while (accumulator >= 100) {
-      const before = gameState.status;
+      const before: string = gameState.status;
       gameState = stepSimulation(gameState, 100 * scale);
       accumulator -= 100;
       if (gameState.status !== before) {
@@ -545,6 +569,10 @@ function loop(now: number): void {
     if (now - lastDisplayUpdate > 200) {
       updateSimulationDisplay();
       lastDisplayUpdate = now;
+    }
+    if (now - lastSaveUpdate > 1000) {
+      saveGame();
+      lastSaveUpdate = now;
     }
   } else {
     accumulator = 0;
@@ -575,10 +603,12 @@ document.addEventListener('visibilitychange', () => {
 });
 
 addEventListener('popstate', () => { gameState = null; selectedMachine = null; render(true); });
+addEventListener('online', () => render(false));
+addEventListener('offline', () => render(false));
 
 loadMute();
 render();
-void initializeLicense(() => { if (location.pathname === '/') render(false); }, isDemoPath());
+void initializeLicense(() => { if (location.pathname === '/' || location.pathname === '/play') render(false); }, isDemoPath());
 requestAnimationFrame(loop);
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {

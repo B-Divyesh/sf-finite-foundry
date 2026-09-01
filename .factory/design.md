@@ -16,12 +16,12 @@ The colors come from the generated print-shop scene and remain fixed across the 
 | paper-light | `#FFF8E8` | primary reading surfaces |
 | ink | `#1E2340` | text and deep control plates |
 | ink-muted | `#55556B` | secondary text on paper |
-| coral | `#D94B45` | primary action and active route |
+| coral | `#D94B45` | marks and active route accents |
 | teal | `#147D78` | success and completed production |
 | ochre | `#C58A19` | caution and simulated timer |
 | danger | `#A62E38` | failed shifts and destructive actions |
 
-All body combinations meet 4.5:1. Coral is never used for small text on cream. White or deep ink text sits on solid controls.
+All body combinations meet 4.5:1. Coral is never used for small text on cream. Primary controls use the darker `#9E2E35` coral variant with white text.
 
 ## Type and spacing
 
