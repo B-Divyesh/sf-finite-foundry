@@ -1,0 +1,15 @@
+{
+  "slug": "finite-foundry",
+  "title": "Finite Foundry",
+  "artifact_class": "browser-game",
+  "summary": "Plan six factory routes and finish the campaign in one or two evenings.",
+  "user": "Incremental-game players who want a satisfying campaign without perpetual prestige or microtransactions.",
+  "smallest_useful_product": "A 90-minute factory campaign in six chapters. Set a 5-minute production plan, return to solve a new routing constraint, then dismantle the final machine for a credits ending.",
+  "monetization": "one-time",
+  "constraints": [
+    "Clearly label simulated timers",
+    "Save locally and support export",
+    "No real-time offline accrual",
+    "No prestige, energy timers, ads, loot mechanics, or pay-to-progress"
+  ]
+}
