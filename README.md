@@ -38,8 +38,6 @@ npm test
 npm run build
 ```
 
-`npm test` runs the product checks. `npm run build` creates the static release.
-
 ## Privacy and payment
 
 Play needs no account. The game has no analytics, checkout, or payment form. Progress and sound settings stay in browser storage. See [Privacy](https://finite-foundry.sociobot.in/privacy) and [Terms](https://finite-foundry.sociobot.in/terms).

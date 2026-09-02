@@ -41,7 +41,7 @@ Spacing follows an 8 px base: 4, 8, 16, 24, 32, 48, 64, and 96 px. Text measures
 
 ## Motion policy
 
-One signature motion is the **paper-feed step**: finished goods advance across the route in short, physical 180 ms translations rather than floating continuously. Buttons and cards use 140–220 ms transform/opacity transitions. The generated scene drifts by no more than 12 px while the landing preview enters.
+One signature motion is the **paper-feed step**: finished goods advance across the route in short, physical 180 ms translations rather than floating continuously. Buttons and cards use 140–220 ms transform/opacity transitions.
 
 With `prefers-reduced-motion: reduce`, the paper-feed translation becomes an instant state change, scene drift stops, and transitions are removed. There is no flashing, looping decoration, or mandatory timed input. Screen shake is off by default and remains optional.
 
@@ -62,7 +62,7 @@ The deterministic core advances in fixed 100 ms steps and clamps long frame gaps
 
 ## Asset plan and provenance
 
-The hero is one original generated risograph illustration of a compact impossible factory folding out of a paper plan. It provides the world, while game controls remain authored HTML/CSS for clarity. A responsive WebP is used on the first screen and is kept below 300 KB. The social preview is composed from the same art so the identity stays consistent. Icons and registration marks are hand-authored CSS/SVG.
+The original generated risograph illustration shows a compact impossible factory folding out of a paper plan. It supplies the social preview and supporting source art. The first screen uses authored HTML/CSS so a playable contract remains visible on phone and desktop. Icons and registration marks are hand-authored CSS/SVG.
 
 Prompt sheet: “Editorial risograph collage, compact impossible tabletop factory unfolding from a torn cream production plan, chunky conveyors and stamping machines, coral red and teal ink over deep indigo, ochre registration marks, coarse halftone dots, imperfect two-color overprint, tactile recycled paper fibers, asymmetric overhead three-quarter composition, large calm negative-space area, no people, no text, no letters, no numbers, no logos, no watermark, no gradients, no photorealism.”
 

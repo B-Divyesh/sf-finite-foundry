@@ -162,6 +162,7 @@ test('@claim:demo-isolation preserves the real campaign through every demo exit 
   const realSave = await page.evaluate(() => localStorage.getItem('finite-foundry:save'));
   expect(realSave).toBeTruthy();
   await page.goto('/demo');
+  await page.getByRole('button', { name: 'Turn sound off' }).click();
   await page.locator('[data-action="reset-demo"]').click();
   await expect(page.getByText('Chapter 2 of 6')).toBeVisible();
   await expect(page.locator('[data-slot].filled')).toHaveCount(4);
@@ -172,6 +173,7 @@ test('@claim:demo-isolation preserves the real campaign through every demo exit 
   await page.locator('[data-action="start-real"]').click();
   expect(await page.evaluate(() => localStorage.getItem('finite-foundry:save'))).toBe(realSave);
   expect(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:save'))).toBeNull();
+  expect(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:mute'))).toBeNull();
   expect(outsideRequests).toEqual([]);
 });
 

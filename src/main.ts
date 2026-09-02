@@ -333,7 +333,10 @@ function render(announce = false): void {
 
 function navigate(path: string): void {
   if (isDemoPath() && path !== '/demo') {
-    try { localStorage.removeItem('demo:finite-foundry:save'); } catch { /* Storage may be unavailable. */ }
+    try {
+      localStorage.removeItem('demo:finite-foundry:save');
+      localStorage.removeItem('demo:finite-foundry:mute');
+    } catch { /* Storage may be unavailable. */ }
   }
   history.pushState({}, '', path);
   gameState = null;

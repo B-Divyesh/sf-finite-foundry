@@ -1,29 +1,49 @@
-# Finite Foundry adversarial review handoff
+# Finite Foundry polish handoff
 
-Work order `finite-foundry-review-1` completed on September 2, 2026 against commit `46d3b52f5aa28f1508b13d57ff201f8e1a1e2aa9` and the live production site.
+Perfection-loop round 1 completed September 2, 2026 for <https://finite-foundry.sociobot.in>.
 
-## Result
+## What changed
 
-**FAIL.** The complete evidence and 32 findings are in `.factory/review-1.md`. No product code or infrastructure was changed.
+- Repaired all 32 findings in `.factory/review-1.md` and rechecked the earlier verification findings.
+- Restored the exact sample-data action and outcome copy while keeping playable contracts in the first phone and desktop viewport.
+- Added the missing landing sections, plain wording, route-specific social metadata, complete static 404 chrome, and 44 × 44 px controls.
+- Added safe campaign import: validate the product and schema, preview the replacement, confirm it, and keep demo imports isolated.
+- Expanded `.factory/claims.json` to 19 claims and hardened every observable proof, including closed/hidden pause behavior, exact seeded contracts, the 10× sample clock, privacy surfaces, provenance, and a 20 ms p95 frame bound.
+- Added artwork provenance, font licensing, updated demo documentation, copy audit, and catalog description.
 
-The principal blockers are:
+## Verification
 
-- the exact `local-save-pause` claim command failed once and then passed three retries;
-- four tagged tests do not prove their full claim wording;
-- the prior sample-action repair removed the required adjacent outcome explanation;
-- several phone links remain narrower than 44 px because the repair test checks height only.
+- `npm ci`: passed with 0 vulnerabilities.
+- `npm test`: 27/27 passed.
+- Every exact command in `.factory/claims.json`: 19/19 passed independently from a fresh clone.
+- `npm run build`: passed; `dist/index.html` exists.
+- Initial bundles: JavaScript 32.69 KB raw / 10.84 KB gzip; CSS 23.19 KB raw / 5.63 KB gzip; fonts 58.44 KB total.
+- `/opt/fleet/lib/verify-url.sh https://finite-foundry.sociobot.in .factory/evidence-polish-1`: passed; cold load 645 ms with no console errors.
+- `npm run verify:live`: passed after deployment; complete six-chapter run, query demo, reset/exit isolation, import/export, route metadata, real 404, mobile targets, Axe, offline reload, and frame pacing all passed.
+- Live browser result: zero failures, zero console errors, zero cross-origin requests, 16.7 ms p95 frame interval.
+- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.1 s, LCP 1.3 s, CLS 0.002, TBT 10 ms, 75 KiB transferred.
+- `git diff --check`: passed.
 
-## Verification performed
+## Evidence
 
-- Fresh live Playwright contexts at 390 × 844 and 1440 × 900.
-- One-click demo, reset, full-demo, Start for real, actual real-save isolation, request logging, and offline reload.
-- Every exact command in `.factory/claims.json`.
-- Full `npm test`: 22/22 passed on the later combined run.
-- `npm run build`: passed and produced `dist/`.
-- Live route metadata, HTTP status, link crawl, back/forward focus, touch-target dimensions, console, and semantic checks.
-- `/opt/fleet/lib/verify-url.sh` against production: passed.
-- Current and historical handoffs and both earlier verification reports.
+- `.factory/evidence-polish-1/live-cold-desktop.png`
+- `.factory/evidence-polish-1/live-cold-mobile.png`
+- `.factory/evidence-polish-1/live-demo-ending.png`
+- `.factory/evidence-polish-1/live-check.json`
+- `.factory/evidence-polish-1/verify.json`
+- `.factory/evidence-polish-1/lighthouse.json`
+- `.factory/polish-1.md`
 
-## Known gaps / next steps
+## Deploy
 
-Repair every item in `.factory/review-1.md` and rerun the review from scratch. Do not treat the later green full suite as resolving the earlier required-command failure. No deployment was performed.
+Build with `npm run build`, then deploy with:
+
+```sh
+/opt/fleet/lib/deploy-static.sh finite-foundry /work/repo/dist
+```
+
+The existing `sf-finite-foundry` app in `sociobot` is the only cloud resource used.
+
+## Known gaps
+
+None. Bonus contracts remain intentionally unavailable and are not advertised for sale.
