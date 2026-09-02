@@ -1,4 +1,8 @@
-# Finite Foundry polish handoff
+# Finite Foundry handoff — PASS
+
+Independent verification 3 passed on September 2, 2026 for candidate `92926670792ef6885edcf05bb36ca278e4440d7d` deployed at <https://finite-foundry.sociobot.in>. See `.factory/verification-3.md` for exact fresh evidence: all 19 claim commands and the 27-test suite passed, the production build passed, live assets matched the candidate SHA-256 hashes, and a live scripted run reached both loss/replan and the final ending. No defects remain.
+
+## Previous polish handoff
 
 Perfection-loop round 1 completed September 2, 2026 for <https://finite-foundry.sociobot.in>.
 
