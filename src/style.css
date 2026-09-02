@@ -267,6 +267,26 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
 }
 .demo-banner button, .demo-banner a { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 7px 12px; border: 2px solid var(--ink); background: var(--paper-light); color: var(--ink); font-weight: 700; }
 
+.demo-quick-start {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.7fr) minmax(420px, 1.3fr) auto;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 22px;
+  border: 3px solid var(--ink);
+  background: var(--paper-light);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.demo-quick-start h2 { margin-bottom: 4px; font-family: 'Atkinson Hyperlegible', sans-serif; font-size: 1.25rem; font-weight: 700; }
+.demo-quick-start p { margin: 0; }
+.demo-quick-start .eyebrow { margin-bottom: 2px; }
+.demo-quick-start ol { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin: 0; padding: 0; list-style: none; }
+.demo-quick-start li { display: grid; min-height: 70px; align-content: center; gap: 3px; padding: 8px; border: 2px solid var(--ink); text-align: center; }
+.demo-quick-start li span { color: var(--coral-dark); font-weight: 700; }
+.demo-quick-start li strong { font-size: 0.88rem; line-height: 1.1; }
+.demo-run { display: grid; gap: 8px; justify-items: stretch; min-width: 180px; text-align: center; }
+.demo-run a:not(.button) { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; }
+
 .game-main { display: grid; gap: 40px; padding-top: 48px; }
 .game-heading { display: flex; align-items: end; justify-content: space-between; gap: 32px; }
 .game-heading h1 { max-width: 15ch; margin-bottom: 12px; font-size: clamp(2.2rem, 5vw, 4rem); }
@@ -404,6 +424,7 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
   .contract-picker { grid-template-columns: 1fr; }
   .bonus-board { grid-template-columns: 1fr; }
   .controls-grid { grid-template-columns: 1fr; }
+  .demo-quick-start { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 620px) {
@@ -432,8 +453,10 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
   .site-footer { grid-template-columns: 1fr; }
   .site-footer nav { align-items: flex-start; flex-direction: column; gap: 10px; }
   .site-footer .build { grid-column: auto; }
-  .demo-banner { position: static; align-items: stretch; flex-direction: column; gap: 8px; }
-  .demo-banner button, .demo-banner a { width: 100%; text-align: center; }
+  .demo-banner { display: grid; position: static; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 7px 12px; }
+  .demo-banner strong { grid-column: 1 / 3; line-height: 1.15; }
+  .demo-banner > span { font-size: 0.82rem; line-height: 1.15; text-align: right; }
+  .demo-banner button, .demo-banner a { width: 100%; min-width: 0; padding-inline: 4px; text-align: center; font-size: 0.84rem; line-height: 1.05; }
   .game-main { gap: 28px; padding-top: 32px; }
   .home-game { gap: 16px; padding-top: 16px; }
   .home-heading h1 { font-size: 2rem; }
@@ -472,6 +495,22 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
   .not-found { grid-template-columns: 1fr; gap: 30px; }
   .empty-machine { min-height: 270px; }
   .import-panel { grid-template-columns: 1fr; }
+  .demo-game { gap: 14px; padding-top: 16px; }
+  .demo-game .game-heading h1 { margin-bottom: 5px; font-size: 1.85rem; }
+  .demo-game .game-heading .chapter-stamp { margin-bottom: 4px; }
+  .demo-game .game-heading p:last-child { font-size: 0.94rem; line-height: 1.25; }
+  .demo-quick-start { gap: 10px; padding: 12px; box-shadow: 4px 4px 0 var(--ink); }
+  .demo-quick-start .demo-contract { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 0 8px; }
+  .demo-quick-start .demo-contract .eyebrow { grid-column: 1 / -1; }
+  .demo-quick-start .demo-contract h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .demo-quick-start .demo-contract p { font-size: 0.83rem; white-space: nowrap; }
+  .demo-quick-start ol { gap: 4px; }
+  .demo-quick-start li { min-width: 0; min-height: 53px; padding: 4px 2px; }
+  .demo-quick-start li span { font-size: 0.74rem; }
+  .demo-quick-start li strong { overflow: hidden; font-size: 0.74rem; text-overflow: ellipsis; white-space: nowrap; }
+  .demo-run { grid-template-columns: 1fr auto; align-items: center; min-width: 0; }
+  .demo-run .button { padding-inline: 8px; }
+  .demo-game > .campaign-tools { margin-top: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

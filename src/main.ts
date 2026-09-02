@@ -35,6 +35,16 @@ let muted = false;
 let audioContext: AudioContext | null = null;
 let importCandidate: GameState | null = null;
 let importError = '';
+let previousRouteWasDemo = isDemoPath();
+
+function clearDemoStorage(): void {
+  try {
+    localStorage.removeItem('demo:finite-foundry:save');
+    localStorage.removeItem('demo:finite-foundry:mute');
+  } catch {
+    // Demo still resets in memory when storage is unavailable.
+  }
+}
 
 function safeLoad(): GameState | null {
   try {
@@ -156,6 +166,26 @@ function demoBanner(): string {
   return `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span>Chapter two uses a 10× clock.</span><button type="button" data-action="reset-demo">Reset demo</button><button type="button" data-action="full-demo">Play full demo</button><a href="/play" data-action="start-real">Start for real</a></aside>`;
 }
 
+function demoQuickStart(state: GameState): string {
+  const contract = selectedContract(state);
+  if (!contract || state.status === 'won' || state.status === 'lost') return '';
+  const problems = validatePlan(state);
+  const action = state.status === 'planning'
+    ? problems.length
+      ? '<a class="button" href="#route-title">Fix the route</a>'
+      : '<button type="button" class="button primary" data-action="start-shift">Run five-minute shift</button>'
+    : state.status === 'running'
+      ? '<button type="button" class="button" data-action="pause-shift">Pause shift</button>'
+      : state.status === 'paused'
+        ? '<button type="button" class="button primary" data-action="resume-shift">Resume shift</button>'
+        : '';
+  return `<section class="demo-quick-start" aria-labelledby="demo-route-title" data-demo-route-summary>
+    <div class="demo-contract"><p class="eyebrow">Ready sample</p><h2 id="demo-route-title">${contract.client} · ${contract.product}</h2><p>${contract.quota} units · Five-minute shift</p></div>
+    <ol aria-label="Complete sample route">${state.route.map((id, index) => `<li><span>${index + 1}</span><strong>${id ? MACHINES[id].name : 'Empty'}</strong></li>`).join('')}</ol>
+    <div class="demo-run">${action}<a href="#machines-title">Change the plan</a></div>
+  </section>`;
+}
+
 function landing(): string {
   return gamePage(false, true);
 }
@@ -196,7 +226,7 @@ function routeBoard(state: GameState, disabled: boolean): string {
   </section>`;
 }
 
-function planPanel(state: GameState): string {
+function planPanel(state: GameState, primaryActionShownAbove = false): string {
   const chapter = CHAPTERS[state.chapterIndex]!;
   const contract = selectedContract(state)!;
   const problems = validatePlan(state);
@@ -226,7 +256,7 @@ function planPanel(state: GameState): string {
     </div>
     <progress class="progress-track" data-progress aria-label="Contract production" max="${contract.quota}" value="${Math.floor(state.produced)}">${progress}%</progress>
     <div class="shift-actions">
-      ${state.status === 'planning' ? `<button type="button" class="button primary" data-action="start-shift" ${problems.length ? 'disabled' : ''}>${enough ? 'Run five-minute shift' : 'Run shift anyway'}</button>` : ''}
+      ${state.status === 'planning' && !primaryActionShownAbove ? `<button type="button" class="button primary" data-action="start-shift" ${problems.length ? 'disabled' : ''}>${enough ? 'Run five-minute shift' : 'Run shift anyway'}</button>` : ''}
       ${state.status === 'running' ? '<button type="button" class="button" data-action="pause-shift">Pause shift</button>' : ''}
       ${state.status === 'paused' ? '<button type="button" class="button primary" data-action="resume-shift">Resume shift</button><span>The timer stopped. No production happened while paused.</span>' : ''}
     </div>
@@ -281,25 +311,29 @@ function gamePage(demo: boolean, home = false): string {
   const isEnding = state.status === 'ending';
   const pageHeading = isEnding ? 'You finished the foundry' : home ? 'Finish a six-chapter factory campaign' : chapter.title;
   const pageDescription = isEnding ? 'Your campaign record is ready to export.' : home ? 'For factory-game players who want short planning sessions instead of endless resets.' : chapter.lesson;
-  return `${header()}${demo ? demoBanner() : ''}<main id="main" class="game-main ${home ? 'home-game' : ''}">
+  const tools = `<div class="campaign-tools"><span>Seed ${state.seed}</span><button type="button" data-action="export-save">Export campaign record</button><button type="button" data-action="choose-import">Import campaign record</button><input class="file-input" data-action="import-file" type="file" accept="application/json,.json" aria-label="Choose a Finite Foundry campaign record" tabindex="-1"><button type="button" data-action="new-campaign">New campaign</button></div>`;
+  const quickStart = demo && state.selectedContractId && state.status === 'planning' ? demoQuickStart(state) : '';
+  return `${header()}${demo ? demoBanner() : ''}<main id="main" class="game-main ${home ? 'home-game' : ''} ${demo ? 'demo-game' : ''}">
     <section class="game-heading ${home ? 'home-heading' : ''}">
-      <div><p class="chapter-stamp">${isEnding ? 'Campaign complete' : `Chapter ${chapter.number} of 6`}</p><h1 tabindex="-1">${pageHeading}</h1><p>${pageDescription}</p>${home ? '<ul class="game-facts" aria-label="Game facts"><li>Five-minute simulated shifts</li><li>Saves in this browser</li><li>Complete campaign is free</li></ul>' : ''}</div>
-      <div class="campaign-tools">${home ? '<a class="button sample-link" href="/demo" data-link>Try it with sample data</a><p class="sample-outcome">Opens chapter two with a complete route. Demo changes never touch your campaign.</p>' : `<span>Seed ${state.seed}</span><button type="button" data-action="export-save">Export campaign record</button><button type="button" data-action="choose-import">Import campaign record</button><input class="file-input" data-action="import-file" type="file" accept="application/json,.json" aria-label="Choose a Finite Foundry campaign record" tabindex="-1"><button type="button" data-action="new-campaign">New campaign</button>`}</div>
+      <div><p class="chapter-stamp">${isEnding ? 'Campaign complete' : `Chapter ${chapter.number} of 6`}</p><h1 tabindex="-1">${pageHeading}</h1><p>${pageDescription}</p>${home ? '<ul class="game-facts" aria-label="Game facts"><li>Works offline after the first visit</li><li>Campaign stays in this browser</li><li>Complete campaign is free</li></ul>' : ''}</div>
+      ${home ? '<div class="campaign-tools"><a class="button sample-link" href="/demo" data-link>Try it with sample data</a><p class="sample-outcome">Opens chapter two with a complete route. Demo changes never touch your campaign.</p></div>' : ''}
     </section>
+    ${quickStart}
+    ${home ? '' : tools}
     ${storageError ? `<div class="error-notice" role="alert">${storageError}</div>` : ''}
     ${importPanel()}
     ${state.status === 'ending' ? endingPanel(state) : state.status === 'dismantling' ? dismantlePanel(state) : !state.selectedContractId ? contractPicker(state) : `
       <section class="contract-strip" aria-label="Selected contract"><span>${selectedContract(state)?.mark}</span><div><b>${selectedContract(state)?.client}</b><small>${selectedContract(state)?.product}</small></div><strong>${selectedContract(state)?.quota} units</strong><button type="button" data-action="change-contract" ${state.status !== 'planning' ? 'disabled' : ''}>Change contract</button></section>
       ${machineBank(state, state.status !== 'planning')}
       ${routeBoard(state, state.status !== 'planning')}
-      ${state.status === 'won' || state.status === 'lost' ? resultPanel(state) : planPanel(state)}
+      ${state.status === 'won' || state.status === 'lost' ? resultPanel(state) : planPanel(state, Boolean(quickStart))}
     `}
     ${home ? homeSections() : ''}
   </main>${footer()}`;
 }
 
 function privacyPage(): string {
-  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your campaign stays in your browser</h1><p>Finite Foundry stores your campaign and sound choice in local storage.</p><h2>What leaves this device</h2><p>Nothing is sent during normal play. The game has no analytics, accounts, or payment form.</p><h2>Demo data</h2><p>The demo stores data under separate demo keys. It never reads or writes your real campaign save.</p><h2>Campaign files</h2><p>Exported campaign records are JSON files you control. Imports replace only the campaign for your current mode after confirmation.</p><h2>Deletion</h2><p>Choose “New campaign” to replace the current save. Clear this site’s browser storage to remove every saved setting.</p><p>Last updated: September 2, 2026.</p></main>${footer()}`;
+  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your campaign stays in your browser</h1><p>Finite Foundry stores your campaign and sound choice in local storage.</p><h2>What leaves this device</h2><p>Finite Foundry sends no campaign or sound-setting data during play. The game has no analytics, accounts, or payment form.</p><h2>Demo data</h2><p>The demo stores data under separate demo keys. It never reads or writes your real campaign save.</p><h2>Campaign files</h2><p>Exported campaign records are JSON files you control. Imports replace only the campaign for your current mode after confirmation.</p><h2>Deletion</h2><p>Choose “New campaign” to replace the current save. Clear this site’s browser storage to remove every saved setting.</p><p>Last updated: September 2, 2026.</p></main>${footer()}`;
 }
 
 function termsPage(): string {
@@ -307,7 +341,7 @@ function termsPage(): string {
 }
 
 function notFoundPage(): string {
-  return `${header()}<main id="main" class="not-found"><div><p class="eyebrow">404</p><h1 tabindex="-1">This route reaches an empty bench</h1><p>The page does not exist. Your saved campaign is unchanged.</p><a class="button primary" href="/" data-link>Return to the foundry</a></div><div class="empty-machine" aria-hidden="true"><span></span><span></span><span></span></div></main>${footer()}`;
+  return `${header()}<main id="main" class="not-found"><div><p class="eyebrow">404</p><h1 tabindex="-1">Page not found</h1><p>The page does not exist.</p><a class="button primary" href="/" data-link>Return home</a></div><div class="empty-machine" aria-hidden="true"><span></span><span></span><span></span></div></main>${footer()}`;
 }
 
 function render(announce = false): void {
@@ -333,12 +367,10 @@ function render(announce = false): void {
 
 function navigate(path: string): void {
   if (isDemoPath() && path !== '/demo') {
-    try {
-      localStorage.removeItem('demo:finite-foundry:save');
-      localStorage.removeItem('demo:finite-foundry:mute');
-    } catch { /* Storage may be unavailable. */ }
+    clearDemoStorage();
   }
   history.pushState({}, '', path);
+  previousRouteWasDemo = isDemoPath();
   gameState = null;
   selectedMachine = null;
   importCandidate = null;
@@ -459,13 +491,13 @@ function bindEvents(): void {
     selectedMachine = null;
     saveGame();
     render();
-    document.querySelector<HTMLHeadingElement>('h1')?.focus();
+    document.querySelector<HTMLButtonElement>('[data-action="choose-import"]')?.focus();
   });
   document.querySelector('[data-action="cancel-import"]')?.addEventListener('click', () => {
     importCandidate = null;
     importError = '';
     render();
-    document.querySelector<HTMLInputElement>('[data-action="import-file"]')?.focus();
+    document.querySelector<HTMLButtonElement>('[data-action="choose-import"]')?.focus();
   });
   document.querySelector('[data-action="reset-demo"]')?.addEventListener('click', () => {
     try { localStorage.removeItem('demo:finite-foundry:save'); } catch { /* Continue with fresh memory state. */ }
@@ -522,9 +554,9 @@ function bindEvents(): void {
     saveGame();
     render();
   });
-  document.querySelector('[data-action="start-shift"]')?.addEventListener('click', startShift);
-  document.querySelector('[data-action="pause-shift"]')?.addEventListener('click', () => { if (gameState) { gameState.status = 'paused'; saveGame(); render(); } });
-  document.querySelector('[data-action="resume-shift"]')?.addEventListener('click', () => { if (gameState) { gameState.status = 'running'; lastFrame = performance.now(); saveGame(); render(); } });
+  document.querySelectorAll('[data-action="start-shift"]').forEach((button) => button.addEventListener('click', startShift));
+  document.querySelectorAll('[data-action="pause-shift"]').forEach((button) => button.addEventListener('click', () => { if (gameState) { gameState.status = 'paused'; saveGame(); render(); } }));
+  document.querySelectorAll('[data-action="resume-shift"]').forEach((button) => button.addEventListener('click', () => { if (gameState) { gameState.status = 'running'; lastFrame = performance.now(); saveGame(); render(); } }));
   document.querySelector('[data-action="retry-shift"]')?.addEventListener('click', () => {
     if (!gameState) return;
     gameState.status = 'planning'; gameState.remainingMs = SHIFT_MS; gameState.produced = 0; gameState.batchProgressMs = 0;
@@ -628,7 +660,16 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-addEventListener('popstate', () => { gameState = null; selectedMachine = null; render(true); });
+addEventListener('popstate', () => {
+  const nowDemo = isDemoPath();
+  if (previousRouteWasDemo && !nowDemo) clearDemoStorage();
+  previousRouteWasDemo = nowDemo;
+  gameState = null;
+  selectedMachine = null;
+  importCandidate = null;
+  importError = '';
+  render(true);
+});
 addEventListener('online', () => render(false));
 addEventListener('offline', () => render(false));
 

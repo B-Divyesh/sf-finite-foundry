@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, Page, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 const origin = 'http://127.0.0.1:4174';
 const solutions = [
@@ -134,6 +135,7 @@ test('@claim:export-import-roundtrip exports, previews, confirms, and restores a
   const restored = JSON.parse((await page.evaluate(() => localStorage.getItem('demo:finite-foundry:save')))!);
   expect({ seed: restored.seed, chapterIndex: restored.chapterIndex, route: restored.route }).toEqual({ seed: initial.seed, chapterIndex: initial.chapterIndex, route: initial.route });
   await expect(page.getByText('Chapter 2 of 6')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Import campaign record' })).toBeFocused();
 });
 
 test('campaign import rejects damaged files without changing the current save', async ({ page }) => {
@@ -152,6 +154,7 @@ test('campaign import rejects damaged files without changing the current save', 
   expect(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:save'))).toBe(before);
   await page.getByRole('button', { name: 'Cancel import' }).click();
   await expect(page.getByRole('heading', { name: 'This file cannot be imported' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Import campaign record' })).toBeFocused();
 });
 
 test('@claim:demo-isolation preserves the real campaign through every demo exit path', async ({ page }) => {
@@ -174,6 +177,17 @@ test('@claim:demo-isolation preserves the real campaign through every demo exit 
   expect(await page.evaluate(() => localStorage.getItem('finite-foundry:save'))).toBe(realSave);
   expect(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:save'))).toBeNull();
   expect(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:mute'))).toBeNull();
+
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await page.locator('[data-action="clear-route"]').click();
+  await expect(page.locator('[data-slot].filled')).toHaveCount(0);
+  await page.goBack();
+  expect(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:save'))).toBeNull();
+  expect(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:mute'))).toBeNull();
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page.locator('[data-slot].filled')).toHaveCount(4);
+  expect(await page.evaluate(() => localStorage.getItem('finite-foundry:save'))).toBe(realSave);
   expect(outsideRequests).toEqual([]);
 });
 
@@ -271,13 +285,34 @@ test('@claim:input-modes supports pointer, keyboard, and touch route placement',
 });
 
 test('@claim:privacy-surface crawls every route without accounts, analytics, payments, or cross-origin requests', async ({ page }) => {
-  const outsideRequests: string[] = [];
-  page.on('request', (request) => { if (new URL(request.url()).origin !== origin) outsideRequests.push(request.url()); });
+  const requests: { url: string; method: string; body: string | null }[] = [];
+  page.on('request', (request) => requests.push({ url: request.url(), method: request.method(), body: request.postData() }));
   for (const path of ['/', '/play', '/demo', '/privacy', '/terms', '/missing-page']) {
     await page.goto(path);
     await expect(page.locator('form[action*="login"], [data-account], [data-analytics], [data-license], a[href*="checkout"], script[src*="analytics"]')).toHaveCount(0);
   }
-  expect(outsideRequests).toEqual([]);
+  await page.goto('/privacy');
+  await expect(page.getByText('Finite Foundry sends no campaign or sound-setting data during play.')).toBeVisible();
+  await page.goto('/demo');
+  await page.getByRole('button', { name: 'Run five-minute shift' }).click();
+  await page.waitForTimeout(250);
+  await page.getByRole('button', { name: 'Pause shift' }).click();
+  await page.getByRole('button', { name: 'Turn sound off' }).click();
+  expect(requests.every(({ url }) => new URL(url).origin === origin)).toBe(true);
+  expect(requests.every(({ method, body }) => method === 'GET' && body === null)).toBe(true);
+  const payload = requests.map(({ url, body }) => `${url} ${body ?? ''}`).join('\n');
+  expect(payload).not.toContain('demo:finite-foundry:save');
+  expect(payload).not.toContain('finite-foundry:mute');
+});
+
+test('@claim:source-license verifies the repository MIT license and README link', async () => {
+  const [license, readme] = await Promise.all([
+    readFile('LICENSE', 'utf8'),
+    readFile('README.md', 'utf8')
+  ]);
+  expect(license).toContain('MIT License');
+  expect(license).toContain('Permission is hereby granted, free of charge');
+  expect(readme).toContain('[MIT License](LICENSE)');
 });
 
 test('@claim:frame-rate keeps active demo animation at or below a 20ms p95 interval', async ({ page }) => {
@@ -370,12 +405,31 @@ test('the first desktop and phone viewport contains the exact sample action, out
   }
 });
 
+test('the first phone demo viewport shows its notice, contract, complete route, and run action', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const page = await context.newPage();
+  await page.goto(`${origin}/demo`);
+  await expect(page.getByText('Demo — sample data, nothing is saved')).toBeInViewport();
+  await expect(page.getByText('Chapter 2 of 6')).toBeInViewport();
+  await expect(page.getByRole('heading', { name: /Juniper Kitchen/ })).toBeInViewport();
+  const summary = page.locator('[data-demo-route-summary]');
+  await expect(summary.getByRole('listitem')).toHaveCount(4);
+  await expect(summary).toContainText('Cutter');
+  await expect(summary).toContainText('Kiln');
+  await expect(summary).toContainText('Cooling rack');
+  await expect(summary).toContainText('Press');
+  await expect(page.getByRole('button', { name: 'Run five-minute shift' })).toBeInViewport();
+  await context.close();
+});
+
 test('unknown paths return a complete designed HTTP 404 page', async ({ page }) => {
   const pageErrors: string[] = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
   const response = await page.goto('/missing-page');
   expect(response?.status()).toBe(404);
-  await expect(page.getByRole('heading', { name: 'This route reaches an empty bench' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Return home' })).toBeVisible();
+  await expect(page.getByText('Your saved campaign is unchanged.')).toHaveCount(0);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://finite-foundry.sociobot.in/404');
   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveCount(1);
   await expect(page.getByRole('link', { name: /Built by Param Factory/ })).toBeVisible();

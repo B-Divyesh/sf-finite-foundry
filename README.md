@@ -1,8 +1,8 @@
 # Finite Foundry
 
-Plan six factory routes and finish a campaign. Finite Foundry is a browser game for players who prefer short planning sessions and a final ending.
+Plan six factory routes and finish a campaign. Finite Foundry is a browser game for players who prefer five-minute simulated shifts and a final ending.
 
-Each campaign seed produces the same three contract choices per chapter. Choose an order, arrange machines around one new constraint, and run a five-minute simulated shift. Production pauses when the tab closes or hides.
+Each campaign seed produces the same three contract choices per chapter. Choose an order, arrange machines to meet the chapter rule, and run a five-minute simulated shift. Production pauses when the tab closes or hides.
 
 The complete six-chapter campaign is free. It has no ads, energy limits, loot boxes, paid progress, or progress while the game is closed. Bonus contracts are unavailable while operator registration is pending.
 
