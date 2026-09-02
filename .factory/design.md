@@ -27,7 +27,7 @@ All body combinations meet 4.5:1. Coral is never used for small text on cream. P
 
 Display headings use **Bowlby One SC**, licensed under the SIL Open Font License and self-hosted as a subset. Body and controls use **Atkinson Hyperlegible**, also OFL and self-hosted. The broad display face resembles block-cut type; the quiet body face keeps small machine data readable.
 
-Spacing follows an 8 px base: 4, 8, 16, 24, 32, 48, 64, and 96 px. Text measures never exceed 70 characters. Controls are at least 44 px in both dimensions. On phones, the route becomes a vertical production strip and secondary status moves below it.
+Spacing follows an 8 px base: 4, 8, 16, 24, 32, 48, 64, and 96 px. Text measures never exceed 70 characters. Controls are at least 44 px in both dimensions. On phones, the route becomes a vertical production strip and secondary status moves below it. The seeded phone demo compresses its four placed machines into one proof-strip above file tools, keeping the sample and run action in the first viewport.
 
 ## Shape and interaction grammar
 

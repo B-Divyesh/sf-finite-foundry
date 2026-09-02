@@ -24,6 +24,8 @@ Choose **Play full demo** to begin at chapter one with the same fixed seed. It s
 
 Demo progress uses `demo:finite-foundry:save`. Its sound setting uses `demo:finite-foundry:mute`. Demo mode never reads or writes `finite-foundry:save`.
 
-Choose **Reset demo** to delete the demo save and restore the sample. Choose **Start for real** to delete the demo save and open `/play`; no sample data is copied.
+Choose **Reset demo** to delete the demo save and restore the sample. Choose **Start for real** to delete the demo save and open `/play`; no sample data is copied. Leaving with site navigation or browser Back also clears both demo keys.
+
+At 390 × 844, the initial demo screen shows the demo notice, chapter, named contract, all four placed machines, and **Run five-minute shift** without scrolling. Campaign file tools remain below that ready-to-run summary.
 
 The demo needs no account or network request beyond same-origin page assets. After the first load, the service worker supports an offline reload.

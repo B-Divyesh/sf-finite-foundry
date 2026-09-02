@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const base = 'https://finite-foundry.sociobot.in';
-const out = '.factory/evidence-polish-1';
+const out = '.factory/evidence-polish-2';
 const results = {};
 const failures = [];
 const solutions = [
@@ -37,15 +37,20 @@ const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 
 const page = await desktop.newPage();
 const consoleErrors = [];
 const outsideRequests = [];
+const requests = [];
 page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); });
 page.on('pageerror', (error) => consoleErrors.push(error.message));
-page.on('request', (request) => { if (new URL(request.url()).origin !== base) outsideRequests.push(request.url()); });
+page.on('request', (request) => {
+  requests.push({ url: request.url(), method: request.method(), body: request.postData() });
+  if (new URL(request.url()).origin !== base) outsideRequests.push(request.url());
+});
 
 await page.goto(`${base}/`, { waitUntil: 'networkidle' });
 check(await page.title() === 'Finite Foundry — Finish a factory campaign', 'home title');
 check(await page.locator('h1').count() === 1, 'home h1 count');
 check(await page.getByRole('link', { name: 'Try it with sample data' }).isVisible(), 'sample action');
 check(await page.getByText('Opens chapter two with a complete route. Demo changes never touch your campaign.').isVisible(), 'sample outcome');
+check(await page.getByText('Works offline after the first visit').isVisible(), 'offline first-screen fact');
 check((await page.locator('[data-contract]').first().boundingBox())?.y < 900, 'desktop contract in first viewport');
 await page.screenshot({ path: `${out}/live-cold-desktop.png`, fullPage: true });
 
@@ -65,6 +70,9 @@ check(await page.locator('link[rel="canonical"]').getAttribute('href') === `${ba
 check(await page.locator('meta[property="og:title"]').count() === 1, '404 Open Graph');
 check(await page.locator('link[rel="apple-touch-icon"]').count() === 1, '404 touch icon');
 check(await page.getByRole('link', { name: /Built by Param Factory/ }).isVisible(), '404 factory link');
+check(await page.getByRole('heading', { name: 'Page not found' }).isVisible(), '404 plain heading');
+check(await page.getByRole('link', { name: 'Return home' }).isVisible(), '404 plain action');
+check(await page.getByText('Your saved campaign is unchanged.').count() === 0, '404 has no unlisted save claim');
 const axe404 = await new AxeBuilder({ page }).analyze();
 check(!axe404.violations.some(({ impact }) => impact === 'serious' || impact === 'critical'), '404 axe');
 
@@ -102,6 +110,16 @@ check(await page.evaluate(() => localStorage.getItem('finite-foundry:save')) ===
 check(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:save')) === null, 'demo exit clears demo save');
 check(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:mute')) === null, 'demo exit clears demo sound setting');
 
+await page.goto(`${base}/`);
+await page.getByRole('link', { name: 'Try it with sample data' }).click();
+await page.locator('[data-action="clear-route"]').click();
+await page.goBack();
+check(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:save')) === null, 'browser Back clears demo save');
+check(await page.evaluate(() => localStorage.getItem('demo:finite-foundry:mute')) === null, 'browser Back clears demo sound');
+await page.getByRole('link', { name: 'Try it with sample data' }).click();
+check(await page.locator('[data-slot].filled').count() === 4, 'demo returns with four seeded machines after Back');
+check(await page.evaluate(() => localStorage.getItem('finite-foundry:save')) === realSave, 'Back flow preserves real save');
+
 await page.goto(`${base}/demo`);
 await page.getByRole('button', { name: 'Reset demo' }).click();
 const downloadEvent = page.waitForEvent('download');
@@ -115,6 +133,12 @@ check(await page.getByRole('heading', { name: 'Replace this campaign?' }).isVisi
 await page.getByRole('button', { name: 'Replace with imported campaign' }).click();
 await page.getByText('Chapter 2 of 6').waitFor();
 check(await page.getByText('Chapter 2 of 6').isVisible(), 'import restore');
+check(await page.getByRole('button', { name: 'Import campaign record' }).evaluate((element) => element === document.activeElement), 'successful import restores visible focus');
+
+await page.setInputFiles('[data-action="import-file"]', { name: 'damaged.json', mimeType: 'application/json', buffer: Buffer.from('{"product":"finite-foundry","campaign":{"version":99}}') });
+await page.getByRole('heading', { name: 'This file cannot be imported' }).waitFor();
+await page.getByRole('button', { name: 'Cancel import' }).click();
+check(await page.getByRole('button', { name: 'Import campaign record' }).evaluate((element) => element === document.activeElement), 'cancelled import restores visible focus');
 
 await page.goto(`${base}/demo`);
 await page.getByRole('button', { name: 'Run five-minute shift' }).click();
@@ -146,6 +170,13 @@ const smallTargets = await phone.locator('a, button').evaluateAll((nodes) => nod
 }).map((node) => node.textContent?.trim()));
 check(smallTargets.length === 0, `small mobile targets: ${smallTargets.join(', ')}`);
 await phone.screenshot({ path: `${out}/live-cold-mobile.png`, fullPage: true });
+await phone.goto(`${base}/demo`);
+check(await phone.getByText('Demo — sample data, nothing is saved').evaluate((element) => element.getBoundingClientRect().bottom <= 844), 'mobile demo notice in first viewport');
+check(await phone.getByText('Chapter 2 of 6').evaluate((element) => element.getBoundingClientRect().bottom <= 844), 'mobile demo chapter in first viewport');
+check(await phone.getByRole('heading', { name: /Juniper Kitchen/ }).evaluate((element) => element.getBoundingClientRect().bottom <= 844), 'mobile demo named contract in first viewport');
+check(await phone.locator('[data-demo-route-summary] li').count() === 4, 'mobile demo four-machine summary');
+check(await phone.getByRole('button', { name: 'Run five-minute shift' }).evaluate((element) => element.getBoundingClientRect().bottom <= 844), 'mobile demo run action in first viewport');
+await phone.screenshot({ path: `${out}/live-demo-mobile.png`, fullPage: false });
 for (const path of ['/play', '/demo', '/privacy', '/terms', '/definitely-missing']) {
   await phone.goto(`${base}${path}`);
   check(await phone.evaluate(() => document.documentElement.scrollWidth) <= 390, `${path} mobile overflow`);
@@ -172,6 +203,7 @@ results.liveUrl = base;
 results.checkedAt = new Date().toISOString();
 results.consoleErrors = consoleErrors.filter((message) => !/Failed to load resource:.*404/.test(message));
 results.crossOriginRequests = outsideRequests;
+results.nonGetOrBodyRequests = requests.filter(({ method, body }) => method !== 'GET' || body !== null);
 results.frameP95Ms = Number(p95.toFixed(2));
 results.failures = failures;
 await writeFile(`${out}/live-check.json`, JSON.stringify(results, null, 2));
@@ -181,4 +213,4 @@ await desktop.close();
 await browser.close();
 
 console.log(JSON.stringify(results, null, 2));
-if (failures.length || results.consoleErrors.length || outsideRequests.length) process.exit(1);
+if (failures.length || results.consoleErrors.length || outsideRequests.length || results.nonGetOrBodyRequests.length) process.exit(1);

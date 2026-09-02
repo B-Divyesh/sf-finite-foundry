@@ -13,8 +13,8 @@ Audited September 2, 2026. Hyphenated terms, numbers, and the version string cou
 | Chapter 1 of 6 | 4 | Pass |
 | Finish a six-chapter factory campaign | 5 | Pass |
 | For factory-game players who want short planning sessions instead of endless resets. | 11 | Pass |
-| Five-minute simulated shifts | 3 | Pass |
-| Saves in this browser | 4 | Pass |
+| Works offline after the first visit | 6 | Pass |
+| Campaign stays in this browser | 5 | Pass |
 | Complete campaign is free | 4 | Pass |
 | Try it with sample data | 5 | Pass |
 | Opens chapter two with a complete route. | 7 | Pass |
