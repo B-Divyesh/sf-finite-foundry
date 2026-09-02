@@ -500,9 +500,9 @@ main { display: block; width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
   .demo-game .game-heading .chapter-stamp { margin-bottom: 4px; }
   .demo-game .game-heading p:last-child { font-size: 0.94rem; line-height: 1.25; }
   .demo-quick-start { gap: 10px; padding: 12px; box-shadow: 4px 4px 0 var(--ink); }
-  .demo-quick-start .demo-contract { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 0 8px; }
+  .demo-quick-start .demo-contract { display: grid; gap: 1px; }
   .demo-quick-start .demo-contract .eyebrow { grid-column: 1 / -1; }
-  .demo-quick-start .demo-contract h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .demo-quick-start .demo-contract h2 { font-size: 1.08rem; }
   .demo-quick-start .demo-contract p { font-size: 0.83rem; white-space: nowrap; }
   .demo-quick-start ol { gap: 4px; }
   .demo-quick-start li { min-width: 0; min-height: 53px; padding: 4px 2px; }
