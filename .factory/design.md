@@ -27,7 +27,7 @@ All body combinations meet 4.5:1. Coral is never used for small text on cream. P
 
 Display headings use **Bowlby One SC**, licensed under the SIL Open Font License and self-hosted as a subset. Body and controls use **Atkinson Hyperlegible**, also OFL and self-hosted. The broad display face resembles block-cut type; the quiet body face keeps small machine data readable.
 
-Spacing follows an 8 px base: 4, 8, 16, 24, 32, 48, 64, and 96 px. Text measures never exceed 70 characters. Controls are at least 44 px high. On phones, the route becomes a vertical production strip and secondary status moves below it.
+Spacing follows an 8 px base: 4, 8, 16, 24, 32, 48, 64, and 96 px. Text measures never exceed 70 characters. Controls are at least 44 px in both dimensions. On phones, the route becomes a vertical production strip and secondary status moves below it.
 
 ## Shape and interaction grammar
 
@@ -37,6 +37,7 @@ Spacing follows an 8 px base: 4, 8, 16, 24, 32, 48, 64, and 96 px. Text measures
 - Registration crosses and dot screens are decorative and never convey state.
 - A route reads left-to-right on wide screens and top-to-bottom at 390 px.
 - Keyboard players choose a machine, then a numbered slot. Arrow keys move between route slots. Delete clears the focused slot.
+- Campaign import uses a bordered proof sheet: select a JSON record, review its seed and chapter, then explicitly replace the current save.
 
 ## Motion policy
 

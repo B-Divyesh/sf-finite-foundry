@@ -33,6 +33,8 @@ let lastDisplayUpdate = 0;
 let lastSaveUpdate = 0;
 let muted = false;
 let audioContext: AudioContext | null = null;
+let importCandidate: GameState | null = null;
+let importError = '';
 
 function safeLoad(): GameState | null {
   try {
@@ -40,7 +42,10 @@ function safeLoad(): GameState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as GameState;
     if (parsed.version !== 1 || !CHAPTERS[parsed.chapterIndex] || !Array.isArray(parsed.route)) return null;
-    if (parsed.status === 'running') parsed.status = 'paused';
+    if (parsed.status === 'running') {
+      parsed.status = 'paused';
+      localStorage.setItem(storageKey(), JSON.stringify(parsed));
+    }
     return parsed;
   } catch {
     storageError = 'The saved campaign could not be read. Choose New campaign to replace it.';
@@ -88,7 +93,7 @@ function playTone(kind: 'place' | 'start' | 'win' | 'remove'): void {
 const routeMeta: Record<string, { title: string; description: string }> = {
   '/': {
     title: 'Finite Foundry — Finish a factory campaign',
-    description: 'Plan six factory routes, run five-minute simulated shifts, and finish a campaign with no prestige or cash shop.'
+    description: 'Plan six factory routes, run five-minute simulated shifts, and finish a complete free campaign.'
   },
   '/play': {
     title: 'Play — Finite Foundry',
@@ -104,7 +109,7 @@ const routeMeta: Record<string, { title: string; description: string }> = {
   },
   '/terms': {
     title: 'Terms — Finite Foundry',
-    description: 'Terms for playing Finite Foundry and buying the optional contract set.'
+    description: 'Terms for playing Finite Foundry while optional bonus contracts are unavailable.'
   },
   '/404': {
     title: 'Page not found — Finite Foundry',
@@ -117,6 +122,11 @@ function setMeta(path: string): void {
   document.title = meta.title;
   document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = meta.description;
   document.querySelector<HTMLLinkElement>('link[rel="canonical"]')!.href = `https://finite-foundry.sociobot.in${path === '/' ? '/' : path}`;
+  document.querySelector<HTMLMetaElement>('meta[property="og:title"]')!.content = meta.title;
+  document.querySelector<HTMLMetaElement>('meta[property="og:description"]')!.content = meta.description;
+  document.querySelector<HTMLMetaElement>('meta[property="og:url"]')!.content = `https://finite-foundry.sociobot.in${path === '/' ? '/' : path}`;
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')!.content = meta.title;
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]')!.content = meta.description;
 }
 
 function header(): string {
@@ -129,16 +139,16 @@ function header(): string {
         <a href="/demo" data-link>Demo</a>
         <a href="/privacy" data-link>Privacy</a>
       </nav>
-      <button class="sound-button" type="button" data-action="sound" aria-pressed="${muted}">${muted ? 'Sound off' : 'Sound on'}</button>
+      <button class="sound-button" type="button" data-action="sound" aria-pressed="${muted}">${muted ? 'Turn sound on' : 'Turn sound off'}</button>
     </header>${navigator.onLine ? '' : '<div class="network-notice" role="status">Offline. The campaign still works and saves locally.</div>'}`;
 }
 
 function footer(): string {
   return `
     <footer class="site-footer">
-      <p>Plan six routes. Finish the machine.</p>
+      <p>Plan six factory routes and finish the campaign.</p>
       <nav aria-label="Footer navigation"><a href="/privacy" data-link>Privacy</a><a href="/terms" data-link>Terms</a><a href="https://hello-factory.sociobot.in">Built by Param Factory <span class="sr-only">(external site)</span></a></nav>
-      <p class="build">Version 1.0.0 · Original generated artwork</p>
+      <p class="build">Version 1.1.0 · Generated artwork used in the social preview</p>
     </footer>`;
 }
 
@@ -153,7 +163,7 @@ function landing(): string {
 function contractPicker(state: GameState): string {
   const contracts = contractsForChapter(state.seed, state.chapterIndex);
   return `<section class="contract-picker" aria-labelledby="contract-title">
-    <div><p class="eyebrow">Choose one order</p><h2 id="contract-title">Available contracts</h2><p>Lower quotas leave more room for a slower pace.</p></div>
+    <div><p class="eyebrow">Choose one order</p><h2 id="contract-title">Available contracts</h2><p>Choose the quota you want to plan for.</p></div>
     <div class="contract-list">${contracts.map((contract) => `
       <button type="button" class="contract-ticket" data-contract="${contract.id}">
         <span aria-hidden="true">${contract.mark}</span><strong>${contract.client}</strong><span>${contract.product}</span><b>${contract.quota} units</b>
@@ -239,11 +249,29 @@ function dismantlePanel(state: GameState): string {
 }
 
 function endingPanel(state: GameState): string {
-  return `<section class="ending paper-section" aria-labelledby="ending-title"><p class="ending-mark" aria-hidden="true">■ ● ▲</p><h2 id="ending-title">Six shifts. One finished machine.</h2><p>You completed every contract and took the foundry apart. There is no prestige reset.</p>
+  return `<section class="ending paper-section" aria-labelledby="ending-title"><p class="ending-mark" aria-hidden="true">■ ● ▲</p><h2 id="ending-title">Six shifts. One finished machine.</h2><p>You completed every contract and took the foundry apart. The campaign does not restart your progress.</p>
     <dl><div><dt>Campaign seed</dt><dd>${state.seed}</dd></div><div><dt>Contracts filled</dt><dd>${state.history.length}</dd></div><div><dt>Attempts</dt><dd>${state.attempts}</dd></div></dl>
     <div class="ending-actions"><button class="button primary" type="button" data-action="new-campaign">Start another campaign</button><button type="button" data-action="export-save">Export campaign record</button></div>
     <p class="availability-note">Bonus contracts are unavailable while operator registration is pending. The complete six-chapter campaign is free.</p>
   </section>`;
+}
+
+function importPanel(): string {
+  if (!importCandidate && !importError) return '';
+  return `<section class="import-panel" aria-labelledby="import-title">
+    <div><p class="eyebrow">Import preview</p><h2 id="import-title" tabindex="-1">${importCandidate ? 'Replace this campaign?' : 'This file cannot be imported'}</h2>
+    ${importCandidate ? `<p>Seed ${importCandidate.seed}, chapter ${importCandidate.chapterIndex + 1}, with ${importCandidate.completedChapters} completed chapters.</p><p>The current ${isDemoPath() ? 'demo' : 'real'} campaign will be replaced.</p>` : `<p role="alert">${importError}</p>`}</div>
+    <div class="import-actions">${importCandidate ? '<button class="button primary" type="button" data-action="confirm-import">Replace with imported campaign</button>' : ''}<button type="button" data-action="cancel-import">Cancel import</button></div>
+  </section>`;
+}
+
+function homeSections(): string {
+  return `<section class="steps paper-section" aria-labelledby="how-title"><p class="eyebrow">How it works</p><h2 id="how-title">Plan, run, then finish</h2><ol>
+    <li><span>1</span><div><h3>Choose a contract</h3><p>Pick one of three orders for the current chapter.</p></div></li>
+    <li><span>2</span><div><h3>Build the route</h3><p>Place each machine while meeting the chapter rule.</p></div></li>
+    <li><span>3</span><div><h3>Run the shift</h3><p>Meet the quota, clear six chapters, then dismantle the line.</p></div></li>
+  </ol></section>
+  <section class="promise" aria-labelledby="limits-title"><div><p class="eyebrow">Privacy and limits</p><h2 id="limits-title">Your campaign stays on this device</h2><p>Play needs no account. Progress stops when the game closes, and bonus contracts are currently unavailable.</p></div><div class="privacy-note"><strong>Stored in this browser</strong><p>Your campaign and sound setting stay in local storage. Demo changes use a separate save.</p><a href="/privacy" data-link>Read the privacy details</a></div></section>`;
 }
 
 function gamePage(demo: boolean, home = false): string {
@@ -252,28 +280,30 @@ function gamePage(demo: boolean, home = false): string {
   const chapter = CHAPTERS[state.chapterIndex]!;
   const isEnding = state.status === 'ending';
   const pageHeading = isEnding ? 'You finished the foundry' : home ? 'Finish a six-chapter factory campaign' : chapter.title;
-  const pageDescription = isEnding ? 'Your campaign record is ready to export.' : home ? 'For production-game players who want clear plans, useful pauses, and an ending.' : chapter.lesson;
+  const pageDescription = isEnding ? 'Your campaign record is ready to export.' : home ? 'For factory-game players who want short planning sessions instead of endless resets.' : chapter.lesson;
   return `${header()}${demo ? demoBanner() : ''}<main id="main" class="game-main ${home ? 'home-game' : ''}">
     <section class="game-heading ${home ? 'home-heading' : ''}">
       <div><p class="chapter-stamp">${isEnding ? 'Campaign complete' : `Chapter ${chapter.number} of 6`}</p><h1 tabindex="-1">${pageHeading}</h1><p>${pageDescription}</p>${home ? '<ul class="game-facts" aria-label="Game facts"><li>Five-minute simulated shifts</li><li>Saves in this browser</li><li>Complete campaign is free</li></ul>' : ''}</div>
-      <div class="campaign-tools">${home ? '<a class="button sample-link" href="/demo" data-link>Try sample route</a>' : `<span>Seed ${state.seed}</span><button type="button" data-action="export-save">Export save</button><button type="button" data-action="new-campaign">New campaign</button>`}</div>
+      <div class="campaign-tools">${home ? '<a class="button sample-link" href="/demo" data-link>Try it with sample data</a><p class="sample-outcome">Opens chapter two with a complete route. Demo changes never touch your campaign.</p>' : `<span>Seed ${state.seed}</span><button type="button" data-action="export-save">Export campaign record</button><button type="button" data-action="choose-import">Import campaign record</button><input class="file-input" data-action="import-file" type="file" accept="application/json,.json" aria-label="Choose a Finite Foundry campaign record" tabindex="-1"><button type="button" data-action="new-campaign">New campaign</button>`}</div>
     </section>
     ${storageError ? `<div class="error-notice" role="alert">${storageError}</div>` : ''}
+    ${importPanel()}
     ${state.status === 'ending' ? endingPanel(state) : state.status === 'dismantling' ? dismantlePanel(state) : !state.selectedContractId ? contractPicker(state) : `
       <section class="contract-strip" aria-label="Selected contract"><span>${selectedContract(state)?.mark}</span><div><b>${selectedContract(state)?.client}</b><small>${selectedContract(state)?.product}</small></div><strong>${selectedContract(state)?.quota} units</strong><button type="button" data-action="change-contract" ${state.status !== 'planning' ? 'disabled' : ''}>Change contract</button></section>
       ${machineBank(state, state.status !== 'planning')}
       ${routeBoard(state, state.status !== 'planning')}
       ${state.status === 'won' || state.status === 'lost' ? resultPanel(state) : planPanel(state)}
     `}
+    ${home ? homeSections() : ''}
   </main>${footer()}`;
 }
 
 function privacyPage(): string {
-  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your campaign stays in your browser</h1><p>Finite Foundry stores your campaign and sound choice in local storage.</p><h2>What leaves this device</h2><p>Nothing is sent during normal play. The game has no analytics, accounts, or payment form.</p><h2>Demo data</h2><p>The demo uses separate keys that start with <code>demo:</code>. Resetting or leaving the demo deletes those keys.</p><h2>Exports</h2><p>An exported campaign is a JSON file you control. It contains the seed, route progress, and completed contract names.</p><h2>Deletion</h2><p>Choose “New campaign” to replace the current save. Clear this site’s browser storage to remove every saved setting.</p><p>Last updated: September 1, 2026.</p></main>${footer()}`;
+  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your campaign stays in your browser</h1><p>Finite Foundry stores your campaign and sound choice in local storage.</p><h2>What leaves this device</h2><p>Nothing is sent during normal play. The game has no analytics, accounts, or payment form.</p><h2>Demo data</h2><p>The demo stores data under separate demo keys. It never reads or writes your real campaign save.</p><h2>Campaign files</h2><p>Exported campaign records are JSON files you control. Imports replace only the campaign for your current mode after confirmation.</p><h2>Deletion</h2><p>Choose “New campaign” to replace the current save. Clear this site’s browser storage to remove every saved setting.</p><p>Last updated: September 2, 2026.</p></main>${footer()}`;
 }
 
 function termsPage(): string {
-  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Terms</p><h1 tabindex="-1">Terms for playing Finite Foundry</h1><p>You may play, save, and export the game for personal use. The software is provided under the MIT License.</p><h2>Availability</h2><p>The complete six-chapter campaign is free. Bonus contracts are unavailable while operator registration is pending.</p><p>The game works without an account. Browser changes or cleared storage can remove local progress, so export records you want to keep.</p><h2>Fair play</h2><p>Do not use the site to disrupt the service.</p><p>Last updated: September 1, 2026.</p></main>${footer()}`;
+  return `${header()}<main id="main" class="legal paper-section"><p class="eyebrow">Terms</p><h1 tabindex="-1">Terms for playing Finite Foundry</h1><p>You may play, save, export, and import the game for personal use. The software is provided under the MIT License.</p><h2>Availability</h2><p>The complete six-chapter campaign is free. Bonus contracts are unavailable while operator registration is pending.</p><p>The game works without an account. Browser changes or cleared storage can remove local progress, so export records you want to keep.</p><h2>Fair play</h2><p>Do not use the site to disrupt the service.</p><p>Last updated: September 2, 2026.</p></main>${footer()}`;
 }
 
 function notFoundPage(): string {
@@ -308,6 +338,8 @@ function navigate(path: string): void {
   history.pushState({}, '', path);
   gameState = null;
   selectedMachine = null;
+  importCandidate = null;
+  importError = '';
   render(true);
 }
 
@@ -343,6 +375,45 @@ function exportSave(): void {
   URL.revokeObjectURL(url);
 }
 
+function validImportedState(value: unknown): value is GameState {
+  if (!value || typeof value !== 'object') return false;
+  const state = value as Partial<GameState>;
+  const chapter = typeof state.chapterIndex === 'number' ? CHAPTERS[state.chapterIndex] : undefined;
+  const validMachines = new Set<string>(Object.keys(MACHINES));
+  const validStatuses = new Set(['planning', 'running', 'paused', 'won', 'lost', 'dismantling', 'ending']);
+  return state.version === 1
+    && Number.isInteger(state.seed)
+    && Boolean(chapter)
+    && Number.isInteger(state.completedChapters) && state.completedChapters! >= 0 && state.completedChapters! <= 6
+    && Array.isArray(state.route) && state.route.length === chapter!.slots
+    && state.route.every((id) => id === null || validMachines.has(String(id)))
+    && ['lean', 'steady', 'brisk'].includes(String(state.pace))
+    && validStatuses.has(String(state.status))
+    && typeof state.remainingMs === 'number' && state.remainingMs >= 0 && state.remainingMs <= SHIFT_MS
+    && typeof state.produced === 'number' && state.produced >= 0
+    && typeof state.batchProgressMs === 'number' && state.batchProgressMs >= 0
+    && Number.isInteger(state.attempts) && state.attempts! >= 0
+    && Array.isArray(state.history)
+    && typeof state.updatedAt === 'number'
+    && (state.selectedContractId === null || contractsForChapter(state.seed!, state.chapterIndex!).some(({ id }) => id === state.selectedContractId));
+}
+
+async function readImport(file: File): Promise<void> {
+  importCandidate = null;
+  importError = '';
+  try {
+    const record = JSON.parse(await file.text()) as { product?: unknown; campaign?: unknown };
+    if (record.product !== 'finite-foundry') throw new Error('Choose a campaign record exported by Finite Foundry.');
+    if (!validImportedState(record.campaign)) throw new Error('This campaign record is damaged or uses an unsupported version.');
+    importCandidate = structuredClone(record.campaign);
+    if (importCandidate.status === 'running') importCandidate.status = 'paused';
+  } catch (error) {
+    importError = error instanceof Error ? error.message : 'This campaign record could not be read.';
+  }
+  render();
+  requestAnimationFrame(() => document.querySelector<HTMLElement>('#import-title')?.focus());
+}
+
 function newCampaign(): void {
   const message = gameState?.completedChapters ? 'Replace this campaign with a new seed? Export first if you want a copy.' : 'Start this campaign again with a new seed?';
   if (!confirm(message)) return;
@@ -368,6 +439,30 @@ function bindEvents(): void {
     try { localStorage.setItem(muteKey(), String(muted)); } catch { /* Sound still changes for this page view. */ }
     if (!muted) playTone('place');
     render();
+  });
+  document.querySelector<HTMLInputElement>('[data-action="import-file"]')?.addEventListener('change', (event) => {
+    const file = (event.currentTarget as HTMLInputElement).files?.[0];
+    if (file) void readImport(file);
+  });
+  document.querySelector('[data-action="choose-import"]')?.addEventListener('click', () => {
+    document.querySelector<HTMLInputElement>('[data-action="import-file"]')?.click();
+  });
+  document.querySelector('[data-action="confirm-import"]')?.addEventListener('click', () => {
+    if (!importCandidate) return;
+    gameState = structuredClone(importCandidate);
+    gameState.updatedAt = Date.now();
+    importCandidate = null;
+    importError = '';
+    selectedMachine = null;
+    saveGame();
+    render();
+    document.querySelector<HTMLHeadingElement>('h1')?.focus();
+  });
+  document.querySelector('[data-action="cancel-import"]')?.addEventListener('click', () => {
+    importCandidate = null;
+    importError = '';
+    render();
+    document.querySelector<HTMLInputElement>('[data-action="import-file"]')?.focus();
   });
   document.querySelector('[data-action="reset-demo"]')?.addEventListener('click', () => {
     try { localStorage.removeItem('demo:finite-foundry:save'); } catch { /* Continue with fresh memory state. */ }
@@ -525,7 +620,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden && gameState?.status === 'running') {
     gameState.status = 'paused';
     saveGame();
-  } else if (!document.hidden && gameState?.status === 'paused' && (location.pathname === '/play' || location.pathname === '/demo')) {
+  } else if (!document.hidden && gameState?.status === 'paused' && (location.pathname === '/play' || isDemoPath())) {
     render();
   }
 });
