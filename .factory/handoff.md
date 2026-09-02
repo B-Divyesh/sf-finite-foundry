@@ -1,57 +1,29 @@
-# Finite Foundry verification handoff — PASS
+# Finite Foundry adversarial review handoff
 
-Independent verification passed on September 1, 2026 for candidate `5ca7aa3620582f2da901b4c168be5da8e2376ddf` at <https://finite-foundry.sociobot.in>.
+Work order `finite-foundry-review-1` completed on September 2, 2026 against commit `46d3b52f5aa28f1508b13d57ff201f8e1a1e2aa9` and the live production site.
 
-- **Result: PASS.** The live HTML, JS, and CSS hashes exactly match this candidate.
-- Clean install, production build, all 22 automated tests, and every claim test passed. See `.factory/verification-2.md` for exact commands, claim evidence, live headers, privacy request log, and Lighthouse evidence.
-- A real mobile live demo run completed all six routing chapters and the dismantling ending. Invalid-plan recovery, restart, local persistence, offline reload, keyboard/pointer/touch play, reduced motion, and 60 fps frame pacing were verified.
-- No known defects or next steps. Bonus contracts remain explicitly unavailable pending registration; no checkout or paid-progress path is present.
+## Result
 
-## Previous repair handoff
+**FAIL.** The complete evidence and 32 findings are in `.factory/review-1.md`. No product code or infrastructure was changed.
 
-## Release repair
+The principal blockers are:
 
-This repair addresses every release-blocking item in the independent report at commit `e227a5e6e90fb4f549e525a8525d123499d75918`.
+- the exact `local-save-pause` claim command failed once and then passed three retries;
+- four tagged tests do not prove their full claim wording;
+- the prior sample-action repair removed the required adjacent outcome explanation;
+- several phone links remain narrower than 44 px because the repair test checks height only.
 
-Repair commit: `5ca7aa3620582f2da901b4c168be5da8e2376ddf`.
+## Verification performed
 
-- Reproduced the reported billing failure before changing code: `GET https://api.sociobot.in/api/v1/products/finite-foundry/checkout` returned HTTP 404 with `{"error":"enabled factory product","status":404}`.
-- Removed the unregistered $5 checkout, license restore path, and forged-license behavior. Bonus contracts now state plainly that they are unavailable while operator registration is pending. No Sociobot billing resource was registered or changed.
-- The home route is now the real playable campaign. At 1440×900 and 390×844, an operable contract choice is inside the first viewport; the sample route remains one tap away.
-- Expanded the claims manifest to cover shift duration, normal-play privacy, all three input modes, active-shift frame pacing, purchase availability, and both real demo URLs. Every claim test opens `/demo` first. The previous cached-license fixture is gone.
-- Added a full-demo action that restarts chapter one inside `demo:` storage, so the deterministic six-chapter ending is exercised entirely in the sandbox.
-- Raised header, footer, demo-banner, and campaign targets to at least 44px on the 390px viewport.
-- Replaced broad SPA fallback with explicit known-route rewrites and a static response override. Unknown routes now serve the designed `404.html` with HTTP 404. The local test server implements the same boundary and asserts it.
-- Bumped the service-worker cache to `finite-foundry-v2` so the repaired shell updates after deployment.
+- Fresh live Playwright contexts at 390 × 844 and 1440 × 900.
+- One-click demo, reset, full-demo, Start for real, actual real-save isolation, request logging, and offline reload.
+- Every exact command in `.factory/claims.json`.
+- Full `npm test`: 22/22 passed on the later combined run.
+- `npm run build`: passed and produced `dist/`.
+- Live route metadata, HTTP status, link crawl, back/forward focus, touch-target dimensions, console, and semantic checks.
+- `/opt/fleet/lib/verify-url.sh` against production: passed.
+- Current and historical handoffs and both earlier verification reports.
 
-## How to run
+## Known gaps / next steps
 
-```sh
-npm ci
-npm test
-npm run build
-```
-
-The static artifact is `dist/`. `/demo` and `/?demo=1` are the isolated sample entry points. `/play` starts a normal local campaign.
-
-## Verification evidence
-
-- Clean install: `npm ci` completed with 0 vulnerabilities.
-- Full browser suite: `npx playwright test --workers=2 --reporter=list` passed **22/22** in 28.3 seconds. This includes the scripted six-chapter ending, retry/restart, keyboard route controls, pointer/touch placement, 390px layout, 44px targets, real 404 status, offline reload, and accessibility smoke tests.
-- Every required claim command: `npx playwright test --grep '@claim:' --reporter=list` passed **13/13** in 23.0 seconds. The two campaign claims intentionally share the one complete scripted-run test, so all 14 manifest claim IDs have exactly one tagged test.
-- Production build: `npm run build` passed. Output: JavaScript 27.87 KB raw / 9.64 KB gzip; CSS 22.37 KB raw / 5.51 KB gzip.
-- Accessibility: Playwright Axe found no serious or critical issues on `/`, `/demo`, `/privacy`, and `/terms`; the static 404 was separately tested for its HTTP status and semantic page. `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4174/ .factory/evidence-repair` passed with one title, `lang=en`, one `h1`, one main landmark, no missing image alt text, no unlabeled buttons, and no console errors. Its screenshots and report are committed in `.factory/evidence-repair/`.
-- Privacy: demo and normal-play request logging assert same-origin-only game traffic. The product contains no third-party fonts, scripts, checkout, analytics, or runtime API connection.
-- Performance: the deterministic browser claim measures an active demo shift at p95 ≤34 ms across 90 animation frames, meeting the 60 fps target. A local Lighthouse CLI run reached artifact gathering but its Chrome process closed during cleanup and did not emit a score; bundle budgets and browser checks above passed.
-- `npm audit --omit=dev` reported 0 vulnerabilities. `git diff --check` passed.
-
-## Deployment
-
-- Deployed the committed `dist/` with `/opt/fleet/lib/deploy-static.sh finite-foundry dist` to the product-scoped `sf-finite-foundry` Static Web App. Deployment ID: `8987d945-867b-4cb4-a175-c526d499f1a7`.
-- Live identity check: the live JavaScript asset is `/assets/index-BC258Zfe.js`, exactly matching this build.
-- Live checks passed on September 1, 2026: `/` HTTP 200, `/demo` HTTP 200, `/missing-page` HTTP 404, and `verify-url.sh` found no console errors or basic semantic/accessibility failures at `https://finite-foundry.sociobot.in/`.
-
-## Known limitations and next steps
-
-- Bonus contracts deliberately remain unavailable until an operator registers the product and price. Do not add checkout copy or a license path before that registration exists and can be observed end to end.
-- Static Web Apps deployment is production-only; verify the deployed custom domain after upload, including `/missing-page` returning HTTP 404 and `/demo` offline after one visit.
+Repair every item in `.factory/review-1.md` and rerun the review from scratch. Do not treat the later green full suite as resolving the earlier required-command failure. No deployment was performed.
