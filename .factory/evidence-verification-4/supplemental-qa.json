@@ -1,0 +1,46 @@
+{
+  "headers": {
+    "cache-control": "public, must-revalidate, max-age=30",
+    "content-encoding": "br",
+    "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+    "content-type": "text/html",
+    "date": "Wed, 02 Sep 2026 02:22:02 GMT",
+    "etag": "\"58699360\"",
+    "last-modified": "Wed, 02 Sep 2026 01:56:08 GMT",
+    "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=()",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+    "vary": "Accept-Encoding",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-xss-protection": "1; mode=block"
+  },
+  "reducedMotion": {
+    "transitionDuration": "1e-05s",
+    "animationDuration": "1e-05s"
+  },
+  "firstTab": {
+    "text": "Skip to the game",
+    "outline": "rgb(197, 138, 25) solid 4px",
+    "visible": true
+  },
+  "mobileAxe": [],
+  "smallTargets": [],
+  "mobileWidth": {
+    "scrollWidth": 390,
+    "viewport": 390
+  },
+  "zoom200": {
+    "visualScale": 2,
+    "mainVisible": true,
+    "h1Visible": true,
+    "runButtonVisible": true
+  },
+  "serviceWorker": {
+    "scope": "https://finite-foundry.sociobot.in/",
+    "script": "https://finite-foundry.sociobot.in/sw.js",
+    "controller": true
+  },
+  "offlineReload": true,
+  "failures": []
+}

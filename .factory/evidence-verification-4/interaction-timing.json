@@ -1,0 +1,50 @@
+{
+  "maxInteractionEventDurationMs": 48,
+  "events": [
+    {
+      "name": "pointerdown",
+      "duration": 32,
+      "interactionId": 9153
+    },
+    {
+      "name": "pointerup",
+      "duration": 32,
+      "interactionId": 9153
+    },
+    {
+      "name": "click",
+      "duration": 32,
+      "interactionId": 9153
+    },
+    {
+      "name": "pointerdown",
+      "duration": 48,
+      "interactionId": 9160
+    },
+    {
+      "name": "pointerup",
+      "duration": 48,
+      "interactionId": 9160
+    },
+    {
+      "name": "click",
+      "duration": 48,
+      "interactionId": 9160
+    },
+    {
+      "name": "pointerdown",
+      "duration": 32,
+      "interactionId": 9167
+    },
+    {
+      "name": "pointerup",
+      "duration": 32,
+      "interactionId": 9167
+    },
+    {
+      "name": "click",
+      "duration": 32,
+      "interactionId": 9167
+    }
+  ]
+}
