@@ -1,27 +1,19 @@
-# Finite Foundry independent verification 4 handoff — PASS
+# Finite Foundry review 3 handoff — PASS
 
-Independent QA completed September 2, 2026 for candidate `751d26a6b49c321a5e60767605432a486c1ed70c` at <https://finite-foundry.sociobot.in>.
+Independent adversarial QA completed September 2, 2026 against commit `25d59c5781333a98005e766c3d18c2e8c601b035` and <https://finite-foundry.sociobot.in>.
 
 ## Outcome
 
-**PASS.** No release-blocking, high, medium, or low product defects were found. Production HTML, JavaScript, and CSS match the candidate build byte-for-byte.
+**PASS.** No findings remain. No product code was modified; this work added the review record only.
 
-## Verification summary
+## Verified
 
-- All 20 exact `.factory/claims.json` commands passed.
-- `npm test`: 29/29 passed.
-- `npm run build`: passed with TypeScript checking and produced `dist/`.
-- `npm audit --omit=dev`: zero vulnerabilities.
-- Cold desktop and 390 px screens pass the plain-language, one-click demo, and game-in-first-viewport gates.
-- A deterministic live run completed six chapters, dismantled the line, reached **You finished the foundry**, and restarted at chapter one.
-- Invalid routing, a real quota loss/replan/win, damaged import recovery, pause/persistence, export/import, demo isolation, sound persistence, keyboard, pointer, and touch paths passed.
-- Live request logging found no cross-origin, non-GET, body-bearing, analytics, account, or payment requests.
-- Axe found zero serious/critical issues across every route and mobile demo. Focus, reduced motion, 44 px targets, 200% zoom, and 390 px layout passed.
-- Service-worker update and offline reload passed.
-- Frame p95 was 16.7 ms. Lighthouse scored 99 Performance and 100 Accessibility, Best Practices, and SEO; LCP was 1.3 s and total transfer 76 KiB.
-- Security headers and cache policies are correct. The product has no backend endpoints or sign-in, so rate-limit and Entra checks are not applicable.
-
-Full evidence and hashes are in `.factory/verification-4.md` and `.factory/evidence-verification-4/`.
+- Fresh 390 × 844 and 1440 × 900 live visits made the job, audience, and first click clear without scrolling.
+- One click opened the isolated sample. It showed a complete realistic route immediately, kept the demo banner visible, reset correctly, and made only same-origin GET requests.
+- All 20 exact `.factory/claims.json` commands passed from a clean `npm ci` checkout. Each claim tag occurs exactly once.
+- `npm test` passed 29/29. `npm run build` passed and produced `dist/`.
+- Live routing, Back/focus restoration, 404, metadata, links, headers, privacy behavior, keyboard, touch, mobile layout, and accessibility checks passed.
+- All 41 findings from reviews 1 and 2 were independently rechecked and remain fixed.
 
 ## Reproduce
 
@@ -29,10 +21,11 @@ Full evidence and hashes are in `.factory/verification-4.md` and `.factory/evide
 npm ci
 npm test
 npm run build
-npm audit --omit=dev
-npm run verify:live
+node -e "for (const c of require('./.factory/claims.json')) console.log(c.id)" | while IFS= read -r id; do npm test -- --grep "@claim:${id}" || exit 1; done
 ```
 
-## Known gaps and next steps
+See `.factory/review-3.md` for the complete copy audit, claims evidence, and historical-finding audit.
+
+## Known gaps
 
 None.
