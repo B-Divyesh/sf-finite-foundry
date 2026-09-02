@@ -20,7 +20,7 @@ Evidence files:
 | F-1-3 | Added minimum inline size to compact links and checked width and height on every route and the static 404. | `mobile layouts fit…`; live mobile sweep; `live-cold-mobile.png`. |
 | F-1-4 | The six-chapter test now inspects every state for ads, energy, loot, paywall, checkout, and license controls and records all requests. | `@claim:finite-free-run`; live complete run at `/demo?test=1`. |
 | F-1-5 | The claim test asserts all three distinct client names, product names, and quotas for the fixed seed. | `@claim:seeded-contracts`. |
-| F-1-6 | Tightened the frame claim and p95 threshold from 34 ms to 20 ms. | `@claim:frame-rate`; live p95 16.7 ms in `live-check.json`. |
+| F-1-6 | Tightened the frame claim and p95 threshold from 34 ms to 20 ms. | `@claim:frame-rate`; live p95 16.8 ms in `live-check.json`. |
 | F-1-7 | The isolation test creates a valid real save and compares it byte for byte after full-demo, reset, and exit flows. | `@claim:demo-isolation`; repeated on live `/demo` and `/?demo=1`. |
 | F-1-8 | Replaced the unproved pace advice with neutral quota-selection guidance. | Copy audit; live `/`. |
 | F-1-9 | Added the deterministic-seed claim and checks equal and different seeds. | `@claim:deterministic-contracts`. |
@@ -56,6 +56,6 @@ The earlier verification failures remain closed: there is no advertised checkout
 
 - Full local suite: 27/27 passed.
 - Fresh-clone manifest run: all 19 exact claim commands passed independently.
-- Production browser audit: zero failures, zero console errors, zero cross-origin requests, and a 16.7 ms frame p95.
-- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.3 s; CLS 0.002; TBT 10 ms; 75 KiB transfer.
+- Production browser audit: zero failures, zero console errors, zero cross-origin requests, and a 16.8 ms frame p95.
+- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.2 s; CLS 0.002; TBT 10 ms; 76 KiB transfer.
 - Production headers include CSP, HSTS, nosniff, referrer policy, and permissions policy.

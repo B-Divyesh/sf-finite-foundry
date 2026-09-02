@@ -18,10 +18,10 @@ Perfection-loop round 1 completed September 2, 2026 for <https://finite-foundry.
 - Every exact command in `.factory/claims.json`: 19/19 passed independently from a fresh clone.
 - `npm run build`: passed; `dist/index.html` exists.
 - Initial bundles: JavaScript 32.69 KB raw / 10.84 KB gzip; CSS 23.19 KB raw / 5.63 KB gzip; fonts 58.44 KB total.
-- `/opt/fleet/lib/verify-url.sh https://finite-foundry.sociobot.in .factory/evidence-polish-1`: passed; cold load 645 ms with no console errors.
+- `/opt/fleet/lib/verify-url.sh https://finite-foundry.sociobot.in .factory/evidence-polish-1`: passed; cold load 698 ms with no console errors.
 - `npm run verify:live`: passed after deployment; complete six-chapter run, query demo, reset/exit isolation, import/export, route metadata, real 404, mobile targets, Axe, offline reload, and frame pacing all passed.
-- Live browser result: zero failures, zero console errors, zero cross-origin requests, 16.7 ms p95 frame interval.
-- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.1 s, LCP 1.3 s, CLS 0.002, TBT 10 ms, 75 KiB transferred.
+- Live browser result: zero failures, zero console errors, zero cross-origin requests, 16.8 ms p95 frame interval.
+- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.2 s, LCP 1.2 s, CLS 0.002, TBT 10 ms, 76 KiB transferred.
 - `git diff --check`: passed.
 
 ## Evidence
