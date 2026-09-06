@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-09-06T07:36:28.560Z",
+  "liveUrl": "https://finite-foundry.sociobot.in",
+  "engines": {
+    "chromium": {
+      "version": "145.0.7632.6",
+      "firstScreen": true,
+      "ending": true,
+      "restart": true,
+      "audioAfterGesture": true,
+      "reloadPaused": true,
+      "phoneTouch": true,
+      "errors": []
+    },
+    "firefox": {
+      "version": "146.0.1",
+      "firstScreen": true,
+      "ending": true,
+      "restart": true,
+      "audioAfterGesture": true,
+      "reloadPaused": true,
+      "phoneTouch": true,
+      "errors": [],
+      "phoneEmulation": "390x844 viewport with touch; Playwright Firefox does not implement isMobile"
+    },
+    "webkit": {
+      "version": "26.0",
+      "firstScreen": true,
+      "ending": true,
+      "restart": true,
+      "audioAfterGesture": true,
+      "reloadPaused": true,
+      "phoneTouch": true,
+      "errors": []
+    }
+  }
+}
