@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-09-06T07:48:51.605Z",
+  "base": "https://finite-foundry.sociobot.in",
+  "desktop": {
+    "home title": true,
+    "job": true,
+    "audience": true,
+    "first action": true,
+    "action outcome": true,
+    "game before scroll": true,
+    "demo label": true,
+    "sample populated": true,
+    "reset sample": true,
+    "demo preserves real": true,
+    "exit clears demo": true,
+    "exit keeps real": true,
+    "invalid feedback": true,
+    "boundary warning": true,
+    "loss end": true,
+    "loss recovery": true,
+    "real campaign ending": true,
+    "designed 404": true
+  },
+  "phone": {
+    "job and first action": true,
+    "game before scroll": true,
+    "no overflow": true,
+    "demo label": true,
+    "touch placement": true
+  },
+  "axe": {
+    "/": 0,
+    "/demo": 0,
+    "/privacy": 0,
+    "/terms": 0,
+    "/definitely-missing": 0
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "outsideRequests": []
+}
